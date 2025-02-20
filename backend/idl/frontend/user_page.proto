@@ -1,0 +1,82 @@
+syntax="proto3";
+
+package frontend.user;
+
+option go_package="frontend/user";
+import "frontend/common_hertz.proto";
+import "frontend/api.proto";
+
+service UserService {
+  rpc Register(RegisterReq) returns (RegisterResp) {
+    option (api.post) = "/user/register";
+  }
+  rpc Login(LoginReq) returns (LoginResp) {
+    option (api.post) = "/user/login";
+  }
+  rpc GetUserInfo(GetUserInfoReq) returns (GetUserInfoResp) {
+    option (api.get) = "/user/get/:user_id";
+  }
+  rpc Logout(LogoutReq) returns (common_hertz.Empty) {
+    option (api.post) = "/user/logout";
+  }
+  rpc DeleteUser(DeleteUserReq) returns (common_hertz.Empty) {
+    option (api.post) = "/user/delete/:user_id";
+  }
+  rpc UpdateUser(UpdateUserReq) returns (UpdateUserResp) {
+    option (api.post) = "/user/update/:user_id";
+  }
+}
+
+message User {
+  uint32 user_id = 1;
+  string email = 2;
+  string username = 3;
+  string avatar_url = 4;
+}
+
+message RegisterReq {
+  string email = 1 [(api.form) = "email" ];
+  string password = 2 [(api.form)= "password"];
+  string confirm_password = 3 [(api.form) = "confirm_password"];
+  string username = 4 [(api.form) = "username"];
+}
+
+message RegisterResp {
+  User user = 1;
+  string access_token = 2;
+}
+
+message LoginReq {
+  string email= 1 [(api.form) = "email" ];
+  string password = 2[(api.form) = "password" ];
+}
+
+message LoginResp {
+  User user = 1;
+  string access_token = 2;
+}
+
+message GetUserInfoReq {
+    uint32 user_id = 1[(api.path) = "user_id" ];
+    string email = 2 [(api.query) = "email"];
+}
+
+message GetUserInfoResp {
+  User user = 1;
+}
+message LogoutReq {
+  string access_token = 1[(api.header) = "Authorization"];
+}
+
+message DeleteUserReq {
+  uint32 user_id = 1[(api.path) = "user_id" ];
+}
+
+message UpdateUserReq {
+  uint32 user_id = 1[(api.path) = "user_id" ];
+  string username = 2[(api.form) = "username" ];
+  string avatar_url = 3[(api.form) = "avatar_url" ];
+}
+message UpdateUserResp {
+  User user = 1;
+}

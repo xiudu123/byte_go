@@ -1,0 +1,7 @@
+syntax = "proto3";
+
+package common_hertz;
+
+option go_package = "frontend/common_hertz";
+
+message Empty {}

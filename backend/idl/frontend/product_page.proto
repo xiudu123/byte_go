@@ -1,0 +1,59 @@
+syntax = "proto3";
+
+package frontend.product;
+
+option go_package = "frontend/product";
+import "frontend/api.proto";
+
+service ProductCatalogService {
+  rpc ListProducts(ListProductsReq) returns (ListProductsResp) {
+      option (api.get) = "/products/list";
+  }
+  rpc GetProduct(GetProductReq) returns (GetProductResp) {
+      option (api.get) = "/products/get/:product_id";
+  }
+  rpc SearchProducts(SearchProductsReq) returns (SearchProductsResp) {
+      option (api.get) = "/products/search";
+  }
+}
+
+message Product {
+  uint32 product_id = 1;
+  string name = 2;
+  string description = 3;
+  string picture = 4;
+  float price = 5;
+
+  repeated string categories = 6;
+}
+
+
+message ListProductsReq{
+  int32 page = 1 [(api.query) = "page"];
+  int64 pageSize = 2 [(api.query) = "page_size"];
+
+  string categoryName = 3[(api.query) = "category_name" ];
+}
+
+message GetProductReq {
+  uint32 product_id = 1[(api.path) = "product_id"];
+}
+
+message SearchProductsReq {
+  string query = 1[(api.query) = "query"];
+}
+
+
+
+message ListProductsResp {
+  repeated Product products = 1;
+  int64 total = 2;
+}
+
+message GetProductResp {
+  Product product = 1;
+}
+
+message SearchProductsResp {
+  repeated Product Products = 1;
+}

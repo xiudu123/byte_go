@@ -1,0 +1,37 @@
+syntax="proto3";
+
+package auth;
+
+option go_package="/auth";
+import "common.proto";
+
+service AuthService {
+  rpc DeliverTokenByRPC(DeliverTokenReq) returns (DeliveryResp) {} // 分发令牌
+  rpc VerifyTokenByRPC(VerifyTokenReq) returns (VerifyResp) {} // 校验令牌
+  rpc DeleteTokenByRPC(DeleteTokenReq) returns (common.Empty) {} // 删除令牌
+  rpc DeleteTokenListByRPC(DeleteTokenListReq) returns (common.Empty) {} // 删除令牌列表
+}
+
+message DeliverTokenReq {
+  uint32  user_id= 1;
+}
+
+message VerifyTokenReq {
+  string token = 1;
+}
+
+message DeleteTokenReq {
+  string jti = 1;
+}
+message DeleteTokenListReq {
+  uint32 user_id = 1;
+}
+
+message DeliveryResp {
+  string token = 1;
+}
+
+message VerifyResp {
+  uint32 user_id = 1;
+  string jti = 2;
+}

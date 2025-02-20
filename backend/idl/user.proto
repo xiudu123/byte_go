@@ -1,0 +1,70 @@
+syntax="proto3";
+
+package user;
+
+option go_package="/user";
+import "common.proto";
+
+service UserService {
+  rpc Register(RegisterReq) returns (RegisterResp) {}
+  rpc Login(LoginReq) returns (LoginResp) {}
+  rpc GetUserInfo(GetUserInfoReq) returns (GetUserInfoResp) {}
+  rpc Logout(common.Empty) returns (common.Empty) {}
+  rpc DeleteUser(DeleteUserReq) returns (common.Empty) {}
+  rpc UpdateUser(UpdateUserReq) returns (UpdateUserResp) {}
+}
+
+message User {
+  uint32 user_id = 1;
+  string email = 2;
+  string username = 3;
+  string avatar_url = 4;
+}
+
+message RegisterReq {
+  string email = 1;
+  string password = 2;
+  string confirm_password = 3;
+  string username = 4;
+}
+
+message LoginReq {
+  string email= 1;
+  string password = 2;
+}
+
+message GetUserInfoReq {
+  oneof identifier {
+    uint32 user_id = 1;
+    string email = 2;
+  }
+}
+
+message DeleteUserReq {
+  uint32 user_id = 1;
+  string confirmation = 2;
+}
+
+message UpdateUserReq {
+  uint32 user_id = 1;
+  string username = 2;
+  string avatar_url = 3;
+}
+
+message RegisterResp {
+  User user = 1;
+  string token = 2;
+}
+
+message LoginResp {
+  User user = 1;
+  string token = 2;
+}
+
+message GetUserInfoResp {
+  User user = 1;
+}
+
+message UpdateUserResp {
+  User user = 1;
+}

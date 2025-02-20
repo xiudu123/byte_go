@@ -1,0 +1,66 @@
+syntax = "proto3";
+
+package frontend.order;
+
+import "frontend/cart_page.proto";
+import "frontend/api.proto";
+option go_package = "frontend/order";
+
+service OrderService {
+  rpc PlaceOrder(PlaceOrderReq) returns (PlaceOrderResp) {
+    option (api.get) = "/order/place";
+  }
+  rpc ListOrder(ListOrderReq) returns (ListOrderResp) {
+    option (api.get) = "/order/list";
+  }
+}
+message Address {
+  string street_address = 1 [(api.form) = "street_address"];
+  string city = 2 [(api.form) = "city"];
+  string state = 3 [(api.form) = "state"];
+  string country = 4 [(api.form) = "country"];
+  int32 zip_code = 5 [(api.form) = "zip_code"];
+}
+message PlaceOrderReq {
+  uint32 user_id = 1 [(api.form) = "user_id"];
+  string user_currency = 2 [(api.form) = "user_currency" ];
+
+  Address address = 3 [(api.form) = "address" ];
+  string email = 4 [(api.form) = "email" ];
+  repeated OrderItem order_items = 5 [(api.form) = "order_items" ];
+}
+message ListOrderReq {
+  uint32 user_id = 1 [(api.form) = "user_id" ];
+}
+
+
+message PlaceOrderResp {
+  OrderResult order = 1;
+}
+message ListOrderResp {
+  repeated Order orders = 1;
+}
+
+
+
+
+message OrderItem {
+  cart.CartItem item = 1;
+  float cost = 2;
+}
+
+message OrderResult {
+  string order_id = 1;
+}
+
+message Order {
+  repeated OrderItem order_items = 1;
+  string order_id = 2;
+  uint32 user_id = 3;
+  string user_currency = 4;
+  Address address = 5;
+  string email = 6;
+  int32 created_at = 7;
+  bool marked_paid = 8; // 标记是否支付
+}
+
