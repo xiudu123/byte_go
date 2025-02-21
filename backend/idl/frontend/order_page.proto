@@ -8,12 +8,20 @@ option go_package = "frontend/order";
 
 service OrderService {
   rpc PlaceOrder(PlaceOrderReq) returns (PlaceOrderResp) {
-    option (api.get) = "/order/place";
+    option (api.post) = "/order/place";
   }
   rpc ListOrder(ListOrderReq) returns (ListOrderResp) {
     option (api.get) = "/order/list";
   }
+  rpc MarkOrderPaid(MarkOrderPaidReq) returns (MarkOrderPaidResp) {
+    option (api.post) = "/order/mark_paid";
+  }
 }
+message OrderItem {
+  frontend.cart.CartItem item = 1[(api.form) = "item"];
+  float cost = 2 [(api.form) = "cost"];
+}
+
 message Address {
   string street_address = 1 [(api.form) = "street_address"];
   string city = 2 [(api.form) = "city"];
@@ -27,11 +35,17 @@ message PlaceOrderReq {
 
   Address address = 3 [(api.form) = "address" ];
   string email = 4 [(api.form) = "email" ];
-  repeated OrderItem order_items = 5 [(api.form) = "order_items" ];
+  string nickname = 5 [(api.form) = "nickname" ];
+  repeated OrderItem order_items = 6 [(api.form) = "order_items" ];
 }
 message ListOrderReq {
-  uint32 user_id = 1 [(api.form) = "user_id" ];
+  uint32 user_id = 1 [(api.query) = "user_id" ];
 }
+message MarkOrderPaidReq {
+  uint32 user_id = 1 [(api.form) = "user_id"];
+  string order_id = 2 [(api.form) = "order_id" ];
+}
+
 
 
 message PlaceOrderResp {
@@ -44,10 +58,6 @@ message ListOrderResp {
 
 
 
-message OrderItem {
-  cart.CartItem item = 1;
-  float cost = 2;
-}
 
 message OrderResult {
   string order_id = 1;
@@ -64,3 +74,6 @@ message Order {
   bool marked_paid = 8; // 标记是否支付
 }
 
+
+
+message MarkOrderPaidResp {}

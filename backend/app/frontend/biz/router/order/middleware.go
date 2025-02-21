@@ -25,3 +25,8 @@ func _placeorderMw() []app.HandlerFunc {
 	// your code...
 	return nil
 }
+
+func _markorderpaidMw() []app.HandlerFunc {
+	// your code...
+	return nil
+}

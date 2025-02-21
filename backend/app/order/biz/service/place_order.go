@@ -8,6 +8,7 @@ import (
 	"context"
 	"github.com/cloudwego/kitex/pkg/klog"
 	"github.com/google/uuid"
+	"gorm.io/gorm"
 )
 
 type PlaceOrderService struct {
@@ -57,7 +58,18 @@ func (s *PlaceOrderService) Run(req *order.PlaceOrderReq) (resp *order.PlaceOrde
 
 	// 保存订单
 	orderQuery := model.NewOrderQuery(s.ctx, mysql.DB)
-	if err = orderQuery.CreateOrder(o, items); err != nil {
+
+	// 开启事务
+	err = mysql.DB.Transaction(func(tx *gorm.DB) error {
+		if err = orderQuery.CreateOrder(o); err != nil {
+			return err
+		}
+		if err = orderQuery.CreateItem(items); err != nil {
+			return err
+		}
+		return nil
+	})
+	if err != nil {
 		klog.Error(err)
 		return nil, kitex_err.SystemError
 	}

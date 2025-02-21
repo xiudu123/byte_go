@@ -4,7 +4,9 @@ import (
 	"byte_go/backend/app/front/conf"
 	"byte_go/backend/rpc_gen/kitex_gen/auth/authservice"
 	"byte_go/backend/rpc_gen/kitex_gen/cart/cartservice"
+	"byte_go/backend/rpc_gen/kitex_gen/checkout/checkoutservice"
 	"byte_go/backend/rpc_gen/kitex_gen/order/orderservice"
+	"byte_go/backend/rpc_gen/kitex_gen/payment/paymentservice"
 	"byte_go/backend/rpc_gen/kitex_gen/product/productcatalogservice"
 	"byte_go/backend/rpc_gen/kitex_gen/user/userservice"
 	"github.com/cloudwego/hertz/pkg/common/hlog"
@@ -24,13 +26,15 @@ import (
  */
 
 var (
-	UserClient    userservice.Client
-	AuthClient    authservice.Client
-	ProductClient productcatalogservice.Client
-	CartClient    cartservice.Client
-	OrderClient   orderservice.Client
-	Once          sync.Once
-	err           error
+	UserClient     userservice.Client
+	AuthClient     authservice.Client
+	ProductClient  productcatalogservice.Client
+	CartClient     cartservice.Client
+	OrderClient    orderservice.Client
+	PaymentClient  paymentservice.Client
+	CheckoutClient checkoutservice.Client
+	Once           sync.Once
+	err            error
 )
 
 func Init() {
@@ -45,6 +49,8 @@ func Init() {
 		initProductCatalogClient(r)
 		initCartClient(r)
 		initOrderClient(r)
+		initPaymentClient(r)
+		initCheckoutClient(r)
 	})
 }
 
@@ -99,6 +105,30 @@ func initCartClient(r discovery.Resolver) {
 func initOrderClient(r discovery.Resolver) {
 	OrderClient, err = orderservice.NewClient(
 		"order",
+		client.WithResolver(r),
+		client.WithMetaHandler(transmeta.ClientTTHeaderHandler),
+		client.WithTransportProtocol(transport.TTHeader),
+	)
+	if err != nil {
+		hlog.Fatal(err)
+	}
+}
+
+func initPaymentClient(r discovery.Resolver) {
+	PaymentClient, err = paymentservice.NewClient(
+		"payment",
+		client.WithResolver(r),
+		client.WithMetaHandler(transmeta.ClientTTHeaderHandler),
+		client.WithTransportProtocol(transport.TTHeader),
+	)
+	if err != nil {
+		hlog.Fatal(err)
+	}
+}
+
+func initCheckoutClient(r discovery.Resolver) {
+	CheckoutClient, err = checkoutservice.NewClient(
+		"checkout",
 		client.WithResolver(r),
 		client.WithMetaHandler(transmeta.ClientTTHeaderHandler),
 		client.WithTransportProtocol(transport.TTHeader),

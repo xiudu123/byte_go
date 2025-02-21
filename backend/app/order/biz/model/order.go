@@ -1,7 +1,6 @@
 package model
 
 import (
-	"byte_go/backend/app/order/biz/dal/mysql"
 	"context"
 	"gorm.io/gorm"
 )
@@ -49,18 +48,12 @@ func NewOrderQuery(ctx context.Context, db *gorm.DB) *OrderQuery {
 	}
 }
 
-func (q OrderQuery) CreateOrder(order *Order, items []OrderItem) (err error) {
+func (q OrderQuery) CreateOrder(order *Order) (err error) {
+	return q.db.WithContext(q.ctx).Create(order).Error
+}
 
-	// 开启事务
-	return mysql.DB.Transaction(func(tx *gorm.DB) error {
-		if err = q.db.WithContext(q.ctx).Create(order).Error; err != nil {
-			return err
-		}
-		if err = q.db.WithContext(q.ctx).Create(items).Error; err != nil {
-			return err
-		}
-		return nil
-	})
+func (q OrderQuery) CreateItem(items []OrderItem) (err error) {
+	return q.db.WithContext(q.ctx).Create(items).Error
 }
 
 func (q OrderQuery) ListOrder(userId uint32) (orders []Order, err error) {

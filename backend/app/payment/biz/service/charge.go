@@ -9,6 +9,7 @@ import (
 	"github.com/cloudwego/kitex/pkg/klog"
 	creditcard "github.com/durango/go-credit-card"
 	"github.com/google/uuid"
+	"strconv"
 )
 
 type ChargeService struct {
@@ -23,9 +24,9 @@ func (s *ChargeService) Run(req *payment.ChargeReq) (resp *payment.ChargeResp, e
 	// Finish your business logic.
 	card := creditcard.Card{
 		Number: req.CreditCard.CreditCardNumber,
-		Cvv:    string(req.CreditCard.CreditCardCvv),
-		Month:  string(req.CreditCard.CreditCardExpirationMonth),
-		Year:   string(req.CreditCard.CreditCardExpirationYear),
+		Cvv:    strconv.Itoa(int(req.CreditCard.CreditCardCvv)),
+		Month:  strconv.Itoa(int(req.CreditCard.CreditCardExpirationMonth)),
+		Year:   strconv.Itoa(int(req.CreditCard.CreditCardExpirationYear)),
 	}
 
 	err = card.Validate(true)

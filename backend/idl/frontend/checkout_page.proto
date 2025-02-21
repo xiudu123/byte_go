@@ -1,0 +1,36 @@
+syntax = "proto3";
+
+package  frontend.checkout;
+
+import "frontend/payment_page.proto";
+import "frontend/api.proto";
+option go_package = "frontend/checkout";
+
+service CheckoutService {
+  rpc Checkout(CheckoutReq) returns (CheckoutResp) {
+    option (api.post) = "/checkout";
+  }
+}
+
+message CheckoutReq {
+  uint32 user_id = 1[(api.form) = "user_id"];
+  string firstname = 2 [(api.form) = "firstname"];
+  string lastname = 3 [(api.form) = "lastname"];
+  string email = 4 [(api.form) = "email"];
+  string user_currency = 5 [(api.form) = "user_currency"];
+  Address address = 6 [(api.form) = "address"];
+  frontend.payment.CreditCardInfo credit_card = 7 [(api.form) = "credit_card"];
+}
+
+message Address {
+  string street_address = 1[(api.form) = "street_address"];
+  string city = 2 [(api.form) = "city"];
+  string state = 3 [(api.form) = "state"];
+  string country = 4 [(api.form) = "country"];
+  int32 zip_code = 5 [(api.form) = "zip_code"];
+}
+
+message CheckoutResp {
+  string order_id = 1;
+  string transaction_id = 2;
+}
