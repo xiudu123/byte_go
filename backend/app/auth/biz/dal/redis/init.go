@@ -1,13 +1,10 @@
 package redis
 
 import (
-	"context"
-	"github.com/cloudwego/kitex/pkg/klog"
-	"strconv"
-	"time"
-
 	"byte_go/backend/app/auth/conf"
+	"context"
 	"github.com/redis/go-redis/v9"
+	"strconv"
 )
 
 var (
@@ -26,43 +23,20 @@ func Init() {
 	}
 }
 
-func SetUserToken(ctx context.Context, userId uint32, token string, ttl time.Duration) {
-	RedisClient.Set(ctx, token, userId, ttl)
-}
-
-func GetUserByToken(ctx context.Context, token string) (uint32, error) {
-	result, err := RedisClient.Get(ctx, token).Result()
-	if err != nil {
-		return 0, err
-	}
-	userId, _ := strconv.ParseUint(result, 10, 32)
-
-	return uint32(userId), nil
-}
-
-func SetJTI(ctx context.Context, userId uint32, jti string) {
-	err := RedisClient.SAdd(ctx, "jti_list:"+strconv.Itoa(int(userId)), jti).Err()
-	if err != nil {
-		klog.Error(err)
-	}
+func SetJTI(ctx context.Context, userId uint32, jti string) (err error) {
+	return RedisClient.SAdd(ctx, "jti_list:"+strconv.Itoa(int(userId)), jti).Err()
 }
 
 func ListJTIList(ctx context.Context, userId uint32) ([]string, error) {
 	return RedisClient.SMembers(ctx, "jti_list:"+strconv.Itoa(int(userId))).Result()
 }
 
-func AddJTI2BlackListed(ctx context.Context, jti string) {
-	err := RedisClient.SAdd(ctx, "blacklisted:jti", jti).Err()
-	if err != nil {
-		klog.Error(err)
-	}
+func AddJTI2BlackListed(ctx context.Context, jti string) (err error) {
+	return RedisClient.SAdd(ctx, "blacklisted:jti", jti).Err()
 }
 
-func AddJTIList2BlackListed(ctx context.Context, jtiList []string) {
-	err := RedisClient.SAdd(ctx, "blacklisted:jti", jtiList).Err()
-	if err != nil {
-		klog.Error(err)
-	}
+func AddJTIList2BlackListed(ctx context.Context, jtiList []string) (err error) {
+	return RedisClient.SAdd(ctx, "blacklisted:jti", jtiList).Err()
 }
 
 func CheckJITIsBlackListed(ctx context.Context, jti string) (bool, error) {

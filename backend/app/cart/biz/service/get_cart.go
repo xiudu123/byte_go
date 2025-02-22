@@ -20,31 +20,35 @@ func NewGetCartService(ctx context.Context) *GetCartService {
 
 // Run create note info
 func (s *GetCartService) Run(req *cart.GetCartReq) (resp *cart.GetCartResp, err error) {
+	// 参数校验
+	if req == nil || req.UserId == 0 {
+		return nil, kitex_err.RequestParamError
+	}
 
 	// 获取购物车
 	cartQuery := model.NewCartQuery(s.ctx, mysql.DB)
 	cartItems, err := cartQuery.GetCartByUserId(req.UserId)
-
-	// 处理错误
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		klog.Errorf("user of userId %d get cart empty", req.UserId)
+		return &cart.GetCartResp{
+			Cart: &cart.Cart{
+				UserId: req.UserId,
+				Items:  []*cart.CartItem{},
+			},
+		}, nil
+	}
 	if err != nil {
-		klog.Error(err)
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return &cart.GetCartResp{
-				Cart: &cart.Cart{
-					UserId: req.UserId,
-				},
-			}, nil
-		}
-		return nil, kitex_err.SystemError
+		klog.Errorf("user of userId %d get cart err: %v", req.UserId, err)
+		return nil, kitex_err.MysqlError
 	}
 
 	// 获取商品
 	resp = &cart.GetCartResp{
 		Cart: &cart.Cart{
 			UserId: req.UserId,
+			Items:  make([]*cart.CartItem, len(cartItems)),
 		},
 	}
-	resp.Cart.Items = make([]*cart.CartItem, len(cartItems))
 	for idx, item := range cartItems {
 		resp.Cart.Items[idx] = &cart.CartItem{
 			ProductId: item.ProductId,

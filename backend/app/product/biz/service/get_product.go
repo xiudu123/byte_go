@@ -6,7 +6,9 @@ import (
 	product "byte_go/backend/rpc_gen/kitex_gen/product"
 	"byte_go/kitex_err"
 	"context"
+	"errors"
 	"github.com/cloudwego/kitex/pkg/klog"
+	"gorm.io/gorm"
 )
 
 type GetProductService struct {
@@ -26,10 +28,15 @@ func (s *GetProductService) Run(req *product.GetProductReq) (resp *product.GetPr
 	// 获取商品
 	productQuery := model.NewProductQuery(s.ctx, mysql.DB)
 	p, err := productQuery.GetProductById(uint(req.ProductId))
-	if err != nil {
-		klog.Error(err)
-		return nil, kitex_err.SystemError
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, kitex_err.ProductNotExist
 	}
+	if err != nil {
+		klog.Errorf("get product by id '%d' failed: %v", req.ProductId, err.Error())
+		return nil, kitex_err.MysqlError
+	}
+
+	// 处理商品分类
 	categoryNames := make([]string, len(p.Categories))
 	for idx, c := range p.Categories {
 		categoryNames[idx] = c.Name

@@ -1,7 +1,9 @@
 package model
 
 import (
+	"byte_go/kitex_err"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 /**
@@ -24,7 +26,18 @@ func (User) TableName() string {
 }
 
 func Create(db *gorm.DB, user *User) error {
-	return db.Create(user).Error
+	// 处理唯一索引冲突
+	result := db.Clauses(clause.OnConflict{
+		Columns:   []clause.Column{{Name: "email"}}, // 指定冲突列
+		DoNothing: true,                             // 冲突时不操作
+	}).Create(user)
+	if result.Error != nil {
+		return result.Error
+	}
+	if result.RowsAffected == 0 {
+		return kitex_err.EmailExistError
+	}
+	return nil
 }
 
 func GetByEmail(db *gorm.DB, email string) (user User, err error) {

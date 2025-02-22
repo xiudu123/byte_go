@@ -18,14 +18,27 @@ func NewListProductsService(ctx context.Context) *ListProductsService {
 
 // Run create note info
 func (s *ListProductsService) Run(req *product.ListProductsReq) (resp *product.ListProductsResp, err error) {
+	// 校验参数
+	if req == nil {
+		return nil, kitex_err.RequestParamError
+	}
+	if req.Page < 1 {
+		req.Page = 1
+	}
+	if req.PageSize < 1 {
+		req.PageSize = 10
+	}
+	if req.PageSize > 100 {
+		req.PageSize = 100
+	}
 
 	// 从数据库中查询商品
 	productQuery := model.NewProductQuery(s.ctx, mysql.DB)
 	productCount, products, err := productQuery.ListProductsByCategory(req.Page, req.PageSize, req.CategoryName)
 
 	if err != nil {
-		klog.Error(err)
-		return nil, kitex_err.SystemError
+		klog.Errorf("list products failed: %v", err.Error())
+		return nil, kitex_err.MysqlError
 	}
 
 	// 封装商品

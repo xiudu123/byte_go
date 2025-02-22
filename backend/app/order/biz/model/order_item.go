@@ -1,6 +1,7 @@
 package model
 
 import (
+	"byte_go/backend/rpc_gen/kitex_gen/order"
 	"gorm.io/gorm"
 )
 
@@ -21,4 +22,14 @@ type OrderItem struct {
 
 func (o OrderItem) TableName() string {
 	return "order_item"
+}
+
+func OrderItemGen2Model(orderId string, orderGen *order.OrderItem) (orderModel OrderItem) {
+	orderModel = OrderItem{
+		OrderParentId: orderId,
+		ProductId:     orderGen.Item.ProductId,
+		Quantity:      orderGen.Item.Quantity,
+		Price:         orderGen.Cost,
+	}
+	return orderModel
 }

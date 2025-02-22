@@ -1,6 +1,8 @@
 package model
 
 import (
+	"byte_go/backend/rpc_gen/kitex_gen/cart"
+	"byte_go/backend/rpc_gen/kitex_gen/order"
 	"context"
 	"gorm.io/gorm"
 )
@@ -36,6 +38,38 @@ func (o Order) TableName() string {
 	return "order"
 }
 
+func OrderModel2Gen(orderModel *Order) (orderGen *order.Order) {
+	orderItems := make([]*order.OrderItem, len(orderModel.OrderItems))
+	for j, item := range orderModel.OrderItems {
+		orderItems[j] = &order.OrderItem{
+			Item: &cart.CartItem{
+				ProductId: item.ProductId,
+				Quantity:  item.Quantity,
+			},
+			Cost: item.Price,
+		}
+	}
+
+	orderGen = &order.Order{
+		OrderId:      orderModel.OrderId,
+		UserId:       orderModel.UserId,
+		UserCurrency: orderModel.UserCurrency,
+		MarkedPaid:   orderModel.MarkedPaid,
+		Email:        orderModel.Consignee.Email,
+		CreatedAt:    int32(orderModel.CreatedAt.Unix()),
+		Address: &order.Address{
+			StreetAddress: orderModel.Consignee.StreetAddress,
+			City:          orderModel.Consignee.City,
+			State:         orderModel.Consignee.State,
+			Country:       orderModel.Consignee.Country,
+			ZipCode:       orderModel.Consignee.ZipCode,
+		},
+		OrderItems: orderItems,
+	}
+
+	return orderGen
+}
+
 type OrderQuery struct {
 	ctx context.Context
 	db  *gorm.DB
@@ -56,12 +90,20 @@ func (q OrderQuery) CreateItem(items []OrderItem) (err error) {
 	return q.db.WithContext(q.ctx).Create(items).Error
 }
 
+func (q OrderQuery) GetOrderByOrderId(orderId string) (order Order, err error) {
+	err = q.db.WithContext(q.ctx).
+		Where("order_id =?", orderId).
+		Preload("OrderItems").
+		First(&order).Error
+	return order, err
+}
+
 func (q OrderQuery) ListOrder(userId uint32) (orders []Order, err error) {
 	err = q.db.WithContext(q.ctx).
 		Where("user_id =?", userId).
 		Preload("OrderItems").
 		Find(&orders).Error
-	return
+	return orders, err
 }
 
 func (q OrderQuery) MarkOrderPaid(orderId string) (err error) {

@@ -21,13 +21,17 @@ func NewCheckoutService(ctx context.Context) *CheckoutService {
 
 // Run create note info
 func (s *CheckoutService) Run(req *checkout.CheckoutReq) (resp *checkout.CheckoutResp, err error) {
+	// 校验参数
+	if req == nil {
+		return nil, kitex_err.RequestParamError
+	}
 
 	// 获取购物车
 	cartResult, err := rpc.CartClient.GetCart(s.ctx, &rpcCart.GetCartReq{
 		UserId: req.UserId,
 	})
 	if err != nil {
-		klog.Error(err)
+		klog.Errorf("user of userId %d get cart error: %v", req.UserId, err.Error())
 		return nil, err
 	}
 	if cartResult == nil || cartResult.Cart == nil || cartResult.Cart.Items == nil || len(cartResult.Cart.Items) == 0 {
@@ -44,9 +48,10 @@ func (s *CheckoutService) Run(req *checkout.CheckoutReq) (resp *checkout.Checkou
 		ProductIds: productIds,
 	})
 	if err != nil {
-		klog.Error(err)
+		klog.Errorf("user of userId %d get product error: %v", req.UserId, err.Error())
 		return nil, err
 	}
+
 	// 构建订单
 	var productMap = make(map[uint32]*rpcProduct.Product)
 	for _, p := range products.Products {
@@ -81,7 +86,7 @@ func (s *CheckoutService) Run(req *checkout.CheckoutReq) (resp *checkout.Checkou
 	})
 
 	if err != nil {
-		klog.Error(err)
+		klog.Errorf("user of userId %d place order error: %v", req.UserId, err.Error())
 		return nil, err
 	}
 
@@ -94,7 +99,7 @@ func (s *CheckoutService) Run(req *checkout.CheckoutReq) (resp *checkout.Checkou
 		UserId: req.UserId,
 	})
 	if err != nil {
-		klog.Error(err)
+		klog.Errorf("user of userId %d empty cart error: %v", req.UserId, err.Error())
 		return nil, err
 	}
 
@@ -111,7 +116,7 @@ func (s *CheckoutService) Run(req *checkout.CheckoutReq) (resp *checkout.Checkou
 		},
 	})
 	if err != nil {
-		klog.Error(err)
+		klog.Errorf("user of userId %d charge error: %v", req.UserId, err.Error())
 		return nil, err
 	}
 

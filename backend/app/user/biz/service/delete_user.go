@@ -21,13 +21,24 @@ func NewDeleteUserService(ctx context.Context) *DeleteUserService {
 
 // Run create note info
 func (s *DeleteUserService) Run(req *user.DeleteUserReq) (resp *common.Empty, err error) {
-	// Finish your business logic.
-	userId := req.UserId
-	err = model.DeleteById(mysql.DB, uint(userId))
-	if err != nil {
-		klog.Error(err)
-		return nil, kitex_err.SystemError
+	// 参数校验
+	if req == nil || req.UserId == 0 {
+		return nil, kitex_err.RequestParamError
 	}
-	_, _ = rpc.AuthClient.DeleteTokenListByRPC(s.ctx, &rpcAuth.DeleteTokenListReq{UserId: userId})
-	return
+
+	// 删除用户
+	userId := req.UserId
+	if err = model.DeleteById(mysql.DB, uint(userId)); err != nil {
+		klog.Errorf("user delete failed, user_id:%+v,  err: %v", userId, err.Error())
+		return nil, kitex_err.MysqlError
+	}
+
+	// 删除用户的token
+	_, err = rpc.AuthClient.DeleteTokenListByRPC(s.ctx, &rpcAuth.DeleteTokenListReq{UserId: userId})
+	if err != nil {
+		klog.Errorf("user delete token list failed, user_id:%+v,  err: %v", userId, err.Error())
+		return nil, err
+	}
+	
+	return &common.Empty{}, nil
 }

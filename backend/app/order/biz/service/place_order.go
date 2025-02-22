@@ -22,6 +22,9 @@ func NewPlaceOrderService(ctx context.Context) *PlaceOrderService {
 func (s *PlaceOrderService) Run(req *order.PlaceOrderReq) (resp *order.PlaceOrderResp, err error) {
 
 	// 校验参数
+	if req == nil || req.UserId == 0 {
+		return nil, kitex_err.RequestParamError
+	}
 	if len(req.OrderItems) == 0 {
 		return nil, kitex_err.OrderItemEmpty
 	}
@@ -48,12 +51,7 @@ func (s *PlaceOrderService) Run(req *order.PlaceOrderReq) (resp *order.PlaceOrde
 	// 生成订单商品
 	var items = make([]model.OrderItem, len(req.OrderItems))
 	for i, item := range req.OrderItems {
-		items[i] = model.OrderItem{
-			OrderParentId: o.OrderId,
-			ProductId:     item.Item.ProductId,
-			Quantity:      item.Item.Quantity,
-			Price:         item.Cost,
-		}
+		items[i] = model.OrderItemGen2Model(o.OrderId, item)
 	}
 
 	// 保存订单
@@ -70,8 +68,8 @@ func (s *PlaceOrderService) Run(req *order.PlaceOrderReq) (resp *order.PlaceOrde
 		return nil
 	})
 	if err != nil {
-		klog.Error(err)
-		return nil, kitex_err.SystemError
+		klog.Errorf("user of userId %d place order err: %v", req.UserId, err.Error())
+		return nil, kitex_err.MysqlError
 	}
 
 	// 生成返回值

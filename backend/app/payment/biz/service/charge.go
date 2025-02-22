@@ -21,43 +21,47 @@ func NewChargeService(ctx context.Context) *ChargeService {
 
 // Run create note info
 func (s *ChargeService) Run(req *payment.ChargeReq) (resp *payment.ChargeResp, err error) {
-	// Finish your business logic.
+
+	// 校验参数
+	if req == nil {
+		return nil, kitex_err.RequestParamError
+	}
+
+	// 校验信用卡
 	card := creditcard.Card{
 		Number: req.CreditCard.CreditCardNumber,
 		Cvv:    strconv.Itoa(int(req.CreditCard.CreditCardCvv)),
 		Month:  strconv.Itoa(int(req.CreditCard.CreditCardExpirationMonth)),
 		Year:   strconv.Itoa(int(req.CreditCard.CreditCardExpirationYear)),
 	}
-
 	err = card.Validate(true)
 	if err != nil {
-		klog.Error(err)
+		klog.Errorf("card valid error: %v", err.Error())
 		return nil, kitex_err.CardValidError
 	}
 
+	// 生成 交易id
 	var transactionId uuid.UUID
-
 	transactionId, err = uuid.NewRandom()
-
 	if err != nil {
-		klog.Error(err)
-		return nil, kitex_err.SystemError
+		klog.Errorf("id generate error: %v", err.Error())
+		return nil, kitex_err.IdGenerateError
 	}
 
+	// 写入数据库
 	paymentQuery := model.NewPaymentQuery(s.ctx, mysql.DB)
-
 	err = paymentQuery.CreatePaymentLog(&model.PaymentLog{
 		UserId:        int32(req.UserId),
 		OrderId:       req.OrderId,
 		TransactionId: transactionId.String(),
 		Amount:        req.Amount,
 	})
-
 	if err != nil {
-		klog.Error(err)
-		return nil, kitex_err.SystemError
+		klog.Errorf("用户 %v 使用卡号 %v 支付失败, error: %v", req.UserId, req.CreditCard.CreditCardNumber, err.Error())
+		return nil, kitex_err.MysqlError
 	}
 
+	// 返回
 	return &payment.ChargeResp{
 		TransactionId: transactionId.String(),
 	}, nil

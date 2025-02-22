@@ -18,17 +18,24 @@ func NewSearchProductsService(ctx context.Context) *SearchProductsService {
 
 // Run create note info
 func (s *SearchProductsService) Run(req *product.SearchProductsReq) (resp *product.SearchProductsResp, err error) {
+	// 校验参数
+	if req == nil {
+		return nil, kitex_err.RequestParamError
+	}
+	if len(req.Query) > 100 {
+		req.Query = req.Query[:100]
+	}
 
 	// 从数据库中查询商品
 	productQuery := model.NewProductQuery(s.ctx, mysql.DB)
 	products, err := productQuery.SearchProducts(req.Query)
 	if err != nil {
-		klog.Error(err)
-		return nil, kitex_err.SystemError
+		klog.Errorf("search products failed: %v", err.Error())
+		return nil, kitex_err.MysqlError
 	}
 
-	resp = &product.SearchProductsResp{}
 	// 封装商品
+	resp = &product.SearchProductsResp{}
 	resp.Products = make([]*product.Product, len(products))
 	for idx, p := range products {
 		resp.Products[idx] = model.ProductModel2Gen(&p)

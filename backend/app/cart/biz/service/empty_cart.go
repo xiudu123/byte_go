@@ -18,13 +18,19 @@ func NewEmptyCartService(ctx context.Context) *EmptyCartService {
 
 // Run create note info
 func (s *EmptyCartService) Run(req *cart.EmptyCartReq) (resp *cart.EmptyCartResp, err error) {
-	// Finish your business logic.
+
+	// 参数校验
+	if req == nil || req.UserId == 0 {
+		return nil, kitex_err.RequestParamError
+	}
+
+	// 数据库操作
 	cartQuery := model.NewCartQuery(s.ctx, mysql.DB)
 	err = cartQuery.EmptyCartByUserId(req.UserId)
-
 	if err != nil {
-		klog.Error(err)
-		return nil, kitex_err.SystemError
+		klog.Errorf("user of userId %d empty cart err: %v", req.UserId, err)
+		return nil, kitex_err.MysqlError
 	}
-	return
+	// 返回
+	return &cart.EmptyCartResp{}, nil
 }

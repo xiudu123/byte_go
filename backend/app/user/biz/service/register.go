@@ -10,7 +10,6 @@ import (
 	"context"
 	"github.com/cloudwego/kitex/pkg/klog"
 	"golang.org/x/crypto/bcrypt"
-	"strconv"
 )
 
 type RegisterService struct {
@@ -20,16 +19,23 @@ func NewRegisterService(ctx context.Context) *RegisterService {
 	return &RegisterService{ctx: ctx}
 }
 
+const (
+	DefaultAvatar = "https://p3-passport.byteacctimg.com/img/mosaic-legacy/3796/2975850990~50x50.awebp"
+)
+
 // Run create note info
-// TODO: 生成 UserId
 func (s *RegisterService) Run(req *user.RegisterReq) (resp *user.RegisterResp, err error) {
+
 	// 参数校验
 	if req.Email == "" || req.Password == "" || req.Username == "" {
-		return nil, kitex_err.ValidateError
+		return nil, kitex_err.RequestParamError
 	}
 	if req.Password != req.ConfirmPassword {
 		return nil, kitex_err.ValidatePasswordNotEqual
 	}
+	// TODO: 校验邮箱格式
+	// TODO: 校验用户名格式
+	// TODO: 校验密码格式
 
 	// 哈希密码
 	passwordHash, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
@@ -43,19 +49,21 @@ func (s *RegisterService) Run(req *user.RegisterReq) (resp *user.RegisterResp, e
 		Email:        req.Email,
 		PasswordHash: string(passwordHash),
 		Username:     req.Username,
-		Avatar:       "https://p3-passport.byteacctimg.com/img/mosaic-legacy/3796/2975850990~50x50.awebp",
+		Avatar:       DefaultAvatar,
 	}
 	err = model.Create(mysql.DB, &newUser)
+	if err == kitex_err.EmailExistError {
+		return nil, kitex_err.EmailExistError
+	}
 	if err != nil {
-		klog.Error(err)
-		return nil, kitex_err.SystemError
+		klog.Error("user create failed: %v", err.Error())
+		return nil, kitex_err.MysqlError
 	}
 
 	// 生成token
 	tokenResp, err := rpc.AuthClient.DeliverTokenByRPC(s.ctx, &auth.DeliverTokenReq{UserId: uint32(newUser.ID)})
-
 	if err != nil {
-		klog.Error(strconv.Itoa(int(newUser.ID)) + " " + err.Error())
+		klog.Errorf("create token by rpc failed,user_id:%v,  err: %v", newUser.ID, err.Error())
 		return nil, err
 	}
 
