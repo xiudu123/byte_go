@@ -3,9 +3,12 @@
 package main
 
 import (
+	"byte_go/backend/app/front/biz/dal"
+	"byte_go/backend/app/front/casbin"
 	"byte_go/backend/app/front/infra/rpc"
 	"byte_go/backend/app/front/middleware"
 	"context"
+	"github.com/joho/godotenv"
 	"time"
 
 	"byte_go/backend/app/front/biz/router"
@@ -27,8 +30,10 @@ import (
 
 func main() {
 	// init dal
-	// dal.Init()
+	_ = godotenv.Load()
+	dal.Init()
 	rpc.Init()
+	casbin.InitCasbin()
 	address := conf.GetConf().Hertz.Address
 	h := server.New(server.WithHostPorts(address))
 
@@ -83,7 +88,7 @@ func registerMiddleware(h *server.Hertz) {
 
 	// cores
 	h.Use(cors.Default())
-	
+
 	// 注册自定义中间件
 	middleware.Register(h)
 }

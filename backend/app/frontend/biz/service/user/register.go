@@ -33,6 +33,8 @@ func (h *RegisterService) Run(req *user.RegisterReq) (resp *user.RegisterResp, e
 		return nil, err
 	}
 
+	// todo: 注册成功后，添加用户角色 casbin.AddRoleForUser(uId, role)
+
 	return &user.RegisterResp{
 		User: &user.User{
 			UserId:    userResp.User.UserId,

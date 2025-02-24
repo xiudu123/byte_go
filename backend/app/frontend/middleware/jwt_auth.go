@@ -6,6 +6,7 @@ import (
 	rpcAuth "byte_go/backend/rpc_gen/kitex_gen/auth"
 	"context"
 	"encoding/json"
+	"fmt"
 	"github.com/bytedance/gopkg/cloud/metainfo"
 	"github.com/cloudwego/hertz/pkg/app"
 	"regexp"
@@ -30,6 +31,7 @@ func JwtAuthMiddleware() app.HandlerFunc {
 
 		// 检测是否在白名单中
 		currentPath := string(ctx.Path())
+		fmt.Println(currentPath)
 		if isWhiteListed(currentPath) {
 			ctx.Next(c)
 			return

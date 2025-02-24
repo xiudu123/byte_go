@@ -12,6 +12,11 @@ services:
       - MYSQL_ROOT=root
       - MYSQL_ROOT_PASSWORD=byte_go
       - MYSQL_DATABASE=user
+      - MYSQL_DATABASE=cart
+      - MYSQL_DATABASE=product
+      - MYSQL_DATABASE=order
+      - MYSQL_DATABASE=rule
+      - MYSQL_DATABASE=payment
   redis:
     image: 'redis:latest'
     ports:

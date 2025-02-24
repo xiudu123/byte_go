@@ -11,11 +11,9 @@ replace (
 )
 
 require (
-	byte_go/backend/constants v0.0.0-00010101000000-000000000000
 	byte_go/backend/rpc_gen v0.0.0-00010101000000-000000000000
 	byte_go/backend/utils v0.0.0-00010101000000-000000000000
 	byte_go/kitex_err v0.0.0-00010101000000-000000000000
-	github.com/bytedance/gopkg v0.1.1
 	github.com/cloudwego/kitex v0.12.1
 	github.com/joho/godotenv v1.5.1
 	github.com/kitex-contrib/obs-opentelemetry/logging/logrus v0.0.0-20241120035129-55da83caab1b
@@ -32,7 +30,9 @@ require (
 )
 
 require (
+	byte_go/backend/constants v0.0.0-00010101000000-000000000000 // indirect
 	github.com/armon/go-metrics v0.0.0-20180917152333-f0300d1749da // indirect
+	github.com/bytedance/gopkg v0.1.1 // indirect
 	github.com/bytedance/sonic v1.12.5 // indirect
 	github.com/bytedance/sonic/loader v0.2.0 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
