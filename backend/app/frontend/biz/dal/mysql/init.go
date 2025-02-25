@@ -10,8 +10,9 @@ import (
 )
 
 var (
-	DB  *gorm.DB
-	err error
+	DB       *gorm.DB
+	err      error
+	NeedDate bool
 )
 
 func Init() {
@@ -32,6 +33,7 @@ func Init() {
 		panic(err)
 	}
 
+	NeedDate = !DB.Migrator().HasTable(&gormadapter.CasbinRule{})
 	err = DB.AutoMigrate(&gormadapter.CasbinRule{})
 	if err != nil {
 		panic(err)

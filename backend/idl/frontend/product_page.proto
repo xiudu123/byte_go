@@ -15,6 +15,18 @@ service ProductCatalogService {
   rpc SearchProducts(SearchProductsReq) returns (SearchProductsResp) {
       option (api.get) = "/products/search";
   }
+  rpc CreateProduct(CreateProductReq) returns (CreateProductResp) {
+      option (api.post) = "/products/create";
+  }
+  rpc DeleteProduct(DeleteProductReq) returns (DeleteProductResp) {
+      option (api.post) = "/products/delete/:product_id";
+  }
+  rpc UpdateProduct(UpdateProductReq) returns (UpdateProductResp) {
+      option (api.post) = "/products/update/:product_id";
+  }
+  rpc CreateCategory(CreateCategoryReq) returns (CreateCategoryResp) {
+      option (api.post) = "/products/create_category";
+  }
 }
 
 message Product {
@@ -43,7 +55,32 @@ message SearchProductsReq {
   string query = 1[(api.query) = "query"];
 }
 
+message CreateProductReq {
+  string name = 1[(api.form) = "name"];
+  string description = 2[(api.form) = "description" ];
+  string picture = 3[(api.form) = "picture" ];
+  float price = 4[(api.form) = "price" ];
 
+  repeated string categories = 5[(api.form) = "categories" ];
+}
+
+message DeleteProductReq {
+  uint32 product_id = 1[(api.path) = "product_id" ];
+}
+
+message UpdateProductReq {
+  uint32 product_id = 1[(api.path) = "product_id" ];
+  string name = 2[(api.form) = "name" ];
+  string description = 3[(api.form) = "description" ];
+  string picture = 4[(api.form) = "picture" ];
+  float price = 5[(api.form) = "price" ];
+
+  repeated string categories = 6[(api.form) = "categories" ];
+}
+
+message CreateCategoryReq {
+  string name = 1[(api.form) = "name" ];
+}
 
 message ListProductsResp {
   repeated Product products = 1;
@@ -56,4 +93,20 @@ message GetProductResp {
 
 message SearchProductsResp {
   repeated Product Products = 1;
+}
+
+
+message CreateProductResp {
+  uint32 product_id = 1;
+}
+
+message DeleteProductResp {
+}
+
+message UpdateProductResp {
+  uint32 product_id = 1;
+}
+
+message CreateCategoryResp {
+  uint32 category_id = 1;
 }

@@ -13,6 +13,12 @@ var (
 	enforcer *casbin.CachedEnforcer
 )
 
+const (
+	UserRole     = "user"
+	AdminRole    = "admin"
+	MerchantRole = "merchant"
+)
+
 func InitCasbin() {
 	tmp, _ := gormadapter.NewAdapterByDB(mysql.DB)
 	m, err := model.NewModelFromFile("./casbin/model.pml")
@@ -24,7 +30,39 @@ func InitCasbin() {
 	if err != nil {
 		return
 	}
-	enforcer.AddFunction("MyPolicy", KeyMatchFunc)
+	//enforcer.AddFunction("MyPolicy", KeyMatchFunc)
+	if mysql.NeedDate {
+		initPagePermission()
+	}
+}
+
+func initPagePermission() {
+	_ = AddPolicyRole(UserRole, "user/register", "post")
+	_ = AddPolicyRole(UserRole, "user/login", "post")
+	_ = AddPolicyRole(UserRole, "user/logout", "post")
+	_ = AddPolicyRole(UserRole, "user/get/*", "get")
+	_ = AddPolicyRole(UserRole, "user/update", "post")
+	_ = AddPolicyRole(UserRole, "user/delete/*", "post")
+	_ = AddPolicyRole(UserRole, "product/get/*", "get")
+	_ = AddPolicyRole(UserRole, "product/list", "get")
+	_ = AddPolicyRole(UserRole, "product/search", "get")
+	_ = AddPolicyRole(UserRole, "cart/add", "post")
+	_ = AddPolicyRole(UserRole, "cart/get", "get")
+	_ = AddPolicyRole(UserRole, "cart/empty", "post")
+	_ = AddPolicyRole(UserRole, "cart/place", "post")
+	_ = AddPolicyRole(UserRole, "cart/list", "get")
+	_ = AddPolicyRole(UserRole, "cart/mark_paid", "post")
+	_ = AddPolicyRole(UserRole, "payment/charge", "post")
+	_ = AddPolicyRole(UserRole, "checkout", "post")
+	_ = AddPolicyRole(AdminRole, "user/delete", "post")
+	_ = AddPolicyRole(MerchantRole, "product/add", "post")
+	_ = AddPolicyRole(MerchantRole, "product/delete", "get")
+	_ = AddPolicyRole(MerchantRole, "product/update", "post")
+}
+
+func AddPolicyRole(role string, path string, method string) (err error) {
+	_, err = enforcer.AddPolicy(role, path, method)
+	return err
 }
 
 func KeyMatch(key1 string, key2 string) bool {
@@ -44,65 +82,71 @@ func KeyMatchFunc(args ...interface{}) (interface{}, error) {
 	return (bool)(KeyMatch(name1, name2)), nil
 }
 
-func AddRoleForUser(uid uint32, role string) {
+func AddRoleForUser(uid uint32, role string) (err error) {
 	uId := strconv.Itoa(int(uid))
-	_, err := enforcer.AddRoleForUser(uId, role)
+	_, err = enforcer.AddRoleForUser(uId, role)
 	if err != nil {
-		panic(err)
+		return err
 	}
-	_ = enforcer.SavePolicy()
+	err = enforcer.SavePolicy()
+	return err
 }
 
-func DeleteRolesForUser(uid uint32, role string) {
+func DeleteRoleForUser(uid uint32, role string) (err error) {
 	uId := strconv.Itoa(int(uid))
-	_, err := enforcer.DeleteRolesForUser(uId, role)
+	_, err = enforcer.DeleteRoleForUser(uId, role)
 	if err != nil {
-		panic(err)
+		return err
 	}
-	_ = enforcer.SavePolicy()
+	err = enforcer.SavePolicy()
+	return err
 }
 
-func GetRolesForUser(uid uint32) []string {
+func DeleteRolesForUser(uid uint32) (err error) {
+	uId := strconv.Itoa(int(uid))
+	_, err = enforcer.DeleteRolesForUser(uId)
+	if err != nil {
+		return err
+	}
+	err = enforcer.SavePolicy()
+	return err
+}
+
+func GetRolesForUser(uid uint32) ([]string, error) {
 	uId := strconv.Itoa(int(uid))
 	roles, err := enforcer.GetRolesForUser(uId)
-	if err != nil {
-		panic(err)
-	}
-	return roles
+	return roles, err
 }
 
-func DeleteUser(uid uint32) {
+func DeleteUser(uid uint32) (err error) {
 	uId := strconv.Itoa(int(uid))
-	_, err := enforcer.DeleteUser(uId)
+	_, err = enforcer.DeleteUser(uId)
 	if err != nil {
-		panic(err)
+		return err
 	}
-	_ = enforcer.SavePolicy()
+	err = enforcer.SavePolicy()
+	return err
 }
 
-func HasRoleForUser(uid uint32, role string) bool {
+func HasRoleForUser(uid uint32, role string) (bool, error) {
 	uId := strconv.Itoa(int(uid))
 	has, err := enforcer.HasRoleForUser(uId, role)
-	if err != nil {
-		panic(err)
-	}
-	return has
+	return has, err
 }
 
-func AddPolicy(uid uint32, path string, method string) {
-	uId := GetRolesForUser(uid)[0]
-	_, err := enforcer.AddPolicy(uId, path, method)
+func CheckPermission(uid uint32, path string, method string) (bool, error) {
+	uIds, err := GetRolesForUser(uid)
 	if err != nil {
-		panic(err)
+		return false, err
 	}
-	_ = enforcer.SavePolicy()
-}
-
-func CheckPermission(uid uint32, path string, method string) bool {
-	uId := GetRolesForUser(uid)[0]
-	ok, err := enforcer.Enforce(uId, path, method)
-	if err != nil {
-		panic(err)
+	for _, uId := range uIds {
+		ok, err := enforcer.Enforce(uId, path, method)
+		if err != nil {
+			return false, err
+		}
+		if ok {
+			return true, nil
+		}
 	}
-	return ok
+	return false, nil
 }

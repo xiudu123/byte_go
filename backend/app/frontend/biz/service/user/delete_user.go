@@ -1,6 +1,7 @@
 package user
 
 import (
+	"byte_go/backend/app/front/casbin"
 	"byte_go/backend/app/front/infra/rpc"
 	rpcUser "byte_go/backend/rpc_gen/kitex_gen/user"
 	"context"
@@ -26,6 +27,11 @@ func (h *DeleteUserService) Run(req *user.DeleteUserReq) (resp *common_hertz.Emp
 		UserId: req.UserId,
 	})
 	if err != nil {
+		hlog.Error(err)
+		return nil, err
+	}
+
+	if err = casbin.DeleteRolesForUser(req.UserId); err != nil {
 		hlog.Error(err)
 		return nil, err
 	}

@@ -2,7 +2,6 @@ package main
 
 import (
 	"byte_go/backend/app/product/biz/dal"
-	"fmt"
 	"github.com/cloudwego/kitex/pkg/transmeta"
 	"github.com/joho/godotenv"
 	consul "github.com/kitex-contrib/registry-consul"
@@ -28,7 +27,6 @@ func main() {
 
 	err := svr.Run()
 	if err != nil {
-		fmt.Println(err)
 		klog.Error(err.Error())
 	}
 }

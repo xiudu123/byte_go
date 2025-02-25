@@ -1,6 +1,6 @@
 .PONY: gen_frontend
 gen_frontend:
-	@cd app/frontend && cwgo server --type HTTP -I ../../idl --idl ../../idl/frontend/order_page.proto  --service frontend -module byte_go/backend/app/front
+	@cd app/frontend && cwgo server --type HTTP -I ../../idl --idl ../../idl/frontend/product_page.proto  --service frontend -module byte_go/backend/app/front
 
 .PONY: gen_user
 gen_user:

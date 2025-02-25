@@ -9,6 +9,10 @@ service ProductCatalogService {
   rpc GetProduct(GetProductReq) returns (GetProductResp) {}
   rpc SearchProducts(SearchProductsReq) returns (SearchProductsResp) {}
   rpc ListProductByIds(ListProductByIdsReq) returns (ListProductByIdsResp) {}
+  rpc CreateProduct(CreateProductReq) returns (CreateProductResp) {}
+  rpc DeleteProduct(DeleteProductReq) returns (DeleteProductResp) {}
+  rpc UpdateProduct(UpdateProductReq) returns (UpdateProductResp) {}
+  rpc CreateCategory(CreateCategoryReq) returns (CreateCategoryResp) {}
 }
 
 message ListProductsReq{
@@ -55,4 +59,46 @@ message ListProductByIdsReq {
 }
 message ListProductByIdsResp {
   repeated Product products = 1;
+}
+
+message CreateProductReq {
+  string name = 1;
+  string description = 2;
+  string picture = 3;
+  float price = 4;
+
+  repeated string categories = 5;
+}
+
+message CreateProductResp {
+  uint32 product_id = 1;
+}
+
+message DeleteProductReq {
+  uint32 product_id = 1;
+}
+
+message DeleteProductResp {
+}
+
+message UpdateProductReq {
+  uint32 product_id = 1;
+  string name = 2;
+  string description = 3;
+  string picture = 4;
+  float price = 5;
+
+  repeated string categories = 6;
+}
+
+message UpdateProductResp {
+  uint32 product_id = 1;
+}
+
+message CreateCategoryReq {
+  string name = 1;
+}
+
+message CreateCategoryResp {
+  uint32 category_id = 1;
 }

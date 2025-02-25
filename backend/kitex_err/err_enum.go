@@ -32,6 +32,8 @@ var (
 	RequestParamError = kerrors.NewBizStatusError(30007, "请求参数错误")
 	OrderNotExist     = kerrors.NewBizStatusError(40001, "订单不存在")
 	OrderPaidError    = kerrors.NewBizStatusError(40002, "订单已支付")
+	CategoryNotExist  = kerrors.NewBizStatusError(40004, "商品分类不存在")
+	CategoryExist     = kerrors.NewBizStatusError(40005, "商品分类已存在")
 
 	SystemError     = kerrors.NewBizStatusError(50001, "系统错误")
 	RedisError      = kerrors.NewBizStatusError(50002, "系统错误")

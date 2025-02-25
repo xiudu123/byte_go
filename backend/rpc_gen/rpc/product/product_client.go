@@ -16,6 +16,10 @@ type RPCClient interface {
 	GetProduct(ctx context.Context, Req *product.GetProductReq, callOptions ...callopt.Option) (r *product.GetProductResp, err error)
 	SearchProducts(ctx context.Context, Req *product.SearchProductsReq, callOptions ...callopt.Option) (r *product.SearchProductsResp, err error)
 	ListProductByIds(ctx context.Context, Req *product.ListProductByIdsReq, callOptions ...callopt.Option) (r *product.ListProductByIdsResp, err error)
+	CreateProduct(ctx context.Context, Req *product.CreateProductReq, callOptions ...callopt.Option) (r *product.CreateProductResp, err error)
+	DeleteProduct(ctx context.Context, Req *product.DeleteProductReq, callOptions ...callopt.Option) (r *product.DeleteProductResp, err error)
+	UpdateProduct(ctx context.Context, Req *product.UpdateProductReq, callOptions ...callopt.Option) (r *product.UpdateProductResp, err error)
+	CreateCategory(ctx context.Context, Req *product.CreateCategoryReq, callOptions ...callopt.Option) (r *product.CreateCategoryResp, err error)
 }
 
 func NewRPCClient(dstService string, opts ...client.Option) (RPCClient, error) {
@@ -58,4 +62,20 @@ func (c *clientImpl) SearchProducts(ctx context.Context, Req *product.SearchProd
 
 func (c *clientImpl) ListProductByIds(ctx context.Context, Req *product.ListProductByIdsReq, callOptions ...callopt.Option) (r *product.ListProductByIdsResp, err error) {
 	return c.kitexClient.ListProductByIds(ctx, Req, callOptions...)
+}
+
+func (c *clientImpl) CreateProduct(ctx context.Context, Req *product.CreateProductReq, callOptions ...callopt.Option) (r *product.CreateProductResp, err error) {
+	return c.kitexClient.CreateProduct(ctx, Req, callOptions...)
+}
+
+func (c *clientImpl) DeleteProduct(ctx context.Context, Req *product.DeleteProductReq, callOptions ...callopt.Option) (r *product.DeleteProductResp, err error) {
+	return c.kitexClient.DeleteProduct(ctx, Req, callOptions...)
+}
+
+func (c *clientImpl) UpdateProduct(ctx context.Context, Req *product.UpdateProductReq, callOptions ...callopt.Option) (r *product.UpdateProductResp, err error) {
+	return c.kitexClient.UpdateProduct(ctx, Req, callOptions...)
+}
+
+func (c *clientImpl) CreateCategory(ctx context.Context, Req *product.CreateCategoryReq, callOptions ...callopt.Option) (r *product.CreateCategoryResp, err error) {
+	return c.kitexClient.CreateCategory(ctx, Req, callOptions...)
 }

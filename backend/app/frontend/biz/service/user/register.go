@@ -1,6 +1,7 @@
 package user
 
 import (
+	"byte_go/backend/app/front/casbin"
 	"byte_go/backend/app/front/infra/rpc"
 	rpcUser "byte_go/backend/rpc_gen/kitex_gen/user"
 	"context"
@@ -33,7 +34,10 @@ func (h *RegisterService) Run(req *user.RegisterReq) (resp *user.RegisterResp, e
 		return nil, err
 	}
 
-	// todo: 注册成功后，添加用户角色 casbin.AddRoleForUser(uId, role)
+	if err = casbin.AddRoleForUser(userResp.User.UserId, casbin.UserRole); err != nil {
+		hlog.Error(err)
+		return nil, err
+	}
 
 	return &user.RegisterResp{
 		User: &user.User{

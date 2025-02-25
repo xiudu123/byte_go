@@ -1,17 +1,17 @@
 package service
 
 import (
-	auth "byte_go/backend/rpc_gen/kitex_gen/auth"
 	"context"
 	"testing"
+	product "byte_go/backend/rpc_gen/kitex_gen/product"
 )
 
-func TestDeleteTokenByRPC_Run(t *testing.T) {
+func TestDeleteProduct_Run(t *testing.T) {
 	ctx := context.Background()
-	s := NewDeleteTokenByRPCService(ctx)
+	s := NewDeleteProductService(ctx)
 	// init req and assert value
 
-	req := &auth.DeleteTokenReq{}
+	req := &product.DeleteProductReq{}
 	resp, err := s.Run(req)
 	t.Logf("err: %v", err)
 	t.Logf("resp: %v", resp)

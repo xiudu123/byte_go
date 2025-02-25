@@ -1,8 +1,10 @@
 package model
 
 import (
+	"byte_go/backend/app/product/biz/dal/mysql"
 	"byte_go/backend/rpc_gen/kitex_gen/product"
 	"context"
+	"errors"
 	"gorm.io/gorm"
 )
 
@@ -105,4 +107,37 @@ func (p ProductQuery) ListProductsByIds(productIds []uint) (products []Product, 
 		Where("id IN ?", productIds).
 		Find(&products).Error
 	return
+}
+
+func (p ProductQuery) CreateProduct(product Product) (err error) {
+	// 开启事务
+	tx := mysql.DB.Begin()
+	err = p.db.WithContext(p.ctx).Create(&product).Error
+	if err != nil {
+		tx.Rollback()
+	}
+	tx.Commit()
+	return
+}
+
+func (p ProductQuery) DeleteProduct(productId uint) (err error) {
+	err = p.db.WithContext(p.ctx).Delete(&Product{}, productId).Error
+	return
+
+}
+
+func (p ProductQuery) UpdateProduct(product Product) (err error) {
+	err = p.db.WithContext(p.ctx).Save(&product).Error
+	return
+}
+
+func (p ProductQuery) ExistProductById(productId uint) (bool, error) {
+	err := p.db.WithContext(p.ctx).Where("id =?", productId).First(&Product{}).Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return false, nil
+	}
+	if err != nil {
+		return false, err
+	}
+	return true, nil
 }

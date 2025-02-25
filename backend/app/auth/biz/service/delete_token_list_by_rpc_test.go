@@ -1,10 +1,9 @@
 package service
 
 import (
+	auth "byte_go/backend/rpc_gen/kitex_gen/auth"
 	"context"
 	"testing"
-	auth "byte_go/backend/rpc_gen/kitex_gen/auth"
-	common "byte_go/backend/rpc_gen/kitex_gen/common"
 )
 
 func TestDeleteTokenListByRPC_Run(t *testing.T) {
