@@ -84,7 +84,7 @@ func CreateProduct(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 
-	resp, err := service.NewCreateProductService(ctx, c).Run(&req)
+	resp, err := product2.NewCreateProductService(ctx, c).Run(&req)
 
 	if err != nil {
 		utils.SendErrResponse(ctx, c, consts.StatusOK, err)
@@ -104,7 +104,7 @@ func DeleteProduct(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 
-	resp, err := service.NewDeleteProductService(ctx, c).Run(&req)
+	resp, err := product2.NewDeleteProductService(ctx, c).Run(&req)
 
 	if err != nil {
 		utils.SendErrResponse(ctx, c, consts.StatusOK, err)
@@ -124,7 +124,7 @@ func UpdateProduct(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 
-	resp, err := service.NewUpdateProductService(ctx, c).Run(&req)
+	resp, err := product2.NewUpdateProductService(ctx, c).Run(&req)
 
 	if err != nil {
 		utils.SendErrResponse(ctx, c, consts.StatusOK, err)
@@ -144,7 +144,7 @@ func CreateCategory(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 
-	resp, err := service.NewCreateCategoryService(ctx, c).Run(&req)
+	resp, err := product2.NewCreateCategoryService(ctx, c).Run(&req)
 
 	if err != nil {
 		utils.SendErrResponse(ctx, c, consts.StatusOK, err)

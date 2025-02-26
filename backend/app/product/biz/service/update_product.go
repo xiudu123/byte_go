@@ -27,13 +27,19 @@ func (s *UpdateProductService) Run(req *product.UpdateProductReq) (resp *product
 	productQuery := model.NewProductQuery(s.ctx, mysql.DB)
 	categoryQuery := model.NewCategoryQuery(s.ctx, mysql.DB)
 	// 检查商品是否存在
-	productExist, err := productQuery.ExistProductById(uint(req.ProductId))
+	productOld, err := productQuery.ExistProductById(uint(req.ProductId))
 	if err != nil {
 		klog.Errorf("check product [%d] exist failed: %v", req.ProductId, err.Error())
 		return nil, kitex_err.MysqlError
 	}
-	if !productExist {
+	if productOld == nil {
 		return nil, kitex_err.ProductNotExist
+	}
+
+	// 清空商品分类
+	if err = productQuery.ClearCategory(*productOld); err != nil {
+		klog.Errorf("clear product [%d] category failed: %v", req.ProductId, err.Error())
+		return nil, kitex_err.MysqlError
 	}
 
 	// 获取分类

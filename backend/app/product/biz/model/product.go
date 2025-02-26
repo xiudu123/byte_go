@@ -1,7 +1,6 @@
 package model
 
 import (
-	"byte_go/backend/app/product/biz/dal/mysql"
 	"byte_go/backend/rpc_gen/kitex_gen/product"
 	"context"
 	"errors"
@@ -110,13 +109,7 @@ func (p ProductQuery) ListProductsByIds(productIds []uint) (products []Product, 
 }
 
 func (p ProductQuery) CreateProduct(product Product) (err error) {
-	// 开启事务
-	tx := mysql.DB.Begin()
 	err = p.db.WithContext(p.ctx).Create(&product).Error
-	if err != nil {
-		tx.Rollback()
-	}
-	tx.Commit()
 	return
 }
 
@@ -127,17 +120,21 @@ func (p ProductQuery) DeleteProduct(productId uint) (err error) {
 }
 
 func (p ProductQuery) UpdateProduct(product Product) (err error) {
-	err = p.db.WithContext(p.ctx).Save(&product).Error
+	err = p.db.WithContext(p.ctx).Updates(&product).Error
 	return
 }
 
-func (p ProductQuery) ExistProductById(productId uint) (bool, error) {
-	err := p.db.WithContext(p.ctx).Where("id =?", productId).First(&Product{}).Error
+func (p ProductQuery) ExistProductById(productId uint) (product *Product, err error) {
+	err = p.db.WithContext(p.ctx).Where("id =?", productId).First(&product).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return false, nil
+		return nil, nil
 	}
 	if err != nil {
-		return false, err
+		return nil, err
 	}
-	return true, nil
+	return product, nil
+}
+
+func (p ProductQuery) ClearCategory(product Product) (err error) {
+	return p.db.WithContext(p.ctx).Model(&product).Association("Categories").Clear()
 }
