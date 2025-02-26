@@ -1,14 +1,15 @@
 package middleware
 
 import (
+	"byte_go/backend/app/front/casbin"
 	"byte_go/backend/app/front/infra/rpc"
 	"byte_go/backend/constants"
 	rpcAuth "byte_go/backend/rpc_gen/kitex_gen/auth"
 	"context"
 	"encoding/json"
-	"fmt"
 	"github.com/bytedance/gopkg/cloud/metainfo"
 	"github.com/cloudwego/hertz/pkg/app"
+	"github.com/cloudwego/hertz/pkg/common/hlog"
 	"regexp"
 	"strings"
 )
@@ -31,7 +32,7 @@ func JwtAuthMiddleware() app.HandlerFunc {
 
 		// 检测是否在白名单中
 		currentPath := string(ctx.Path())
-		fmt.Println(currentPath)
+		
 		if isWhiteListed(currentPath) {
 			ctx.Next(c)
 			return
@@ -47,6 +48,16 @@ func JwtAuthMiddleware() app.HandlerFunc {
 		}
 
 		claimsJson, _ := json.Marshal(claims)
+		ok, err := casbin.CheckPermission(claims.UserId, currentPath, string(ctx.Method()))
+		if err != nil {
+			hlog.Errorf("user [%d] visit [%s] check permission failed: %v", claims.UserId, currentPath, err.Error())
+			ctx.AbortWithStatusJSON(401, "请重新登录")
+			return
+		}
+		if !ok {
+			hlog.Errorf("user [%d] visit [%s] no permission", claims.UserId, currentPath)
+			ctx.AbortWithStatusJSON(401, "无权限")
+		}
 
 		c = metainfo.WithValue(c, constants.JwtClaimsKey, string(claimsJson))
 		ctx.Next(c)

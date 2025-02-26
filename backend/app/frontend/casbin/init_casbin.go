@@ -42,10 +42,9 @@ func initPagePermission() {
 	_ = AddPolicyRole(UserRole, "user/logout", "post")
 	_ = AddPolicyRole(UserRole, "user/get/*", "get")
 	_ = AddPolicyRole(UserRole, "user/update", "post")
-	_ = AddPolicyRole(UserRole, "user/delete/*", "post")
-	_ = AddPolicyRole(UserRole, "product/get/*", "get")
-	_ = AddPolicyRole(UserRole, "product/list", "get")
-	_ = AddPolicyRole(UserRole, "product/search", "get")
+	_ = AddPolicyRole(UserRole, "products/get/*", "get")
+	_ = AddPolicyRole(UserRole, "products/list", "get")
+	_ = AddPolicyRole(UserRole, "products/search", "get")
 	_ = AddPolicyRole(UserRole, "cart/add", "post")
 	_ = AddPolicyRole(UserRole, "cart/get", "get")
 	_ = AddPolicyRole(UserRole, "cart/empty", "post")
@@ -54,10 +53,10 @@ func initPagePermission() {
 	_ = AddPolicyRole(UserRole, "cart/mark_paid", "post")
 	_ = AddPolicyRole(UserRole, "payment/charge", "post")
 	_ = AddPolicyRole(UserRole, "checkout", "post")
-	_ = AddPolicyRole(AdminRole, "user/delete", "post")
-	_ = AddPolicyRole(MerchantRole, "product/add", "post")
-	_ = AddPolicyRole(MerchantRole, "product/delete", "get")
-	_ = AddPolicyRole(MerchantRole, "product/update", "post")
+	_ = AddPolicyRole(AdminRole, "user/delete/*", "post")
+	_ = AddPolicyRole(MerchantRole, "products/create", "post")
+	_ = AddPolicyRole(MerchantRole, "products/delete/*", "get")
+	_ = AddPolicyRole(MerchantRole, "products/update/*", "post")
 }
 
 func AddPolicyRole(role string, path string, method string) (err error) {
