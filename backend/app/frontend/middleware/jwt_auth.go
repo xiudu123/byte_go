@@ -32,7 +32,6 @@ func JwtAuthMiddleware() app.HandlerFunc {
 
 		// 检测是否在白名单中
 		currentPath := string(ctx.Path())
-		
 		if isWhiteListed(currentPath) {
 			ctx.Next(c)
 			return
@@ -48,14 +47,15 @@ func JwtAuthMiddleware() app.HandlerFunc {
 		}
 
 		claimsJson, _ := json.Marshal(claims)
+
 		ok, err := casbin.CheckPermission(claims.UserId, currentPath, string(ctx.Method()))
 		if err != nil {
-			hlog.Errorf("user [%d] visit [%s] check permission failed: %v", claims.UserId, currentPath, err.Error())
+			hlog.Fatalf("user [%d] visit [%s] method [%s] check permission failed: %v", claims.UserId, currentPath, string(ctx.Method()), err.Error())
 			ctx.AbortWithStatusJSON(401, "请重新登录")
 			return
 		}
 		if !ok {
-			hlog.Errorf("user [%d] visit [%s] no permission", claims.UserId, currentPath)
+			hlog.Fatalf("user [%d] visit [%s] method [%s] no permission", claims.UserId, currentPath, string(ctx.Method()))
 			ctx.AbortWithStatusJSON(401, "无权限")
 		}
 

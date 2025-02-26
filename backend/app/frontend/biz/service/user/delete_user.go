@@ -27,12 +27,12 @@ func (h *DeleteUserService) Run(req *user.DeleteUserReq) (resp *common_hertz.Emp
 		UserId: req.UserId,
 	})
 	if err != nil {
-		hlog.Error(err)
+		hlog.CtxErrorf(h.Context, "delete user [%d] failed, err: %v", req.UserId, err.Error())
 		return nil, err
 	}
 
 	if err = casbin.DeleteRolesForUser(req.UserId); err != nil {
-		hlog.Error(err)
+		hlog.CtxErrorf(h.Context, "delete roles for user [%d] failed, err: %v", req.UserId, err.Error())
 		return nil, err
 	}
 

@@ -7,6 +7,7 @@ import (
 	"byte_go/backend/rpc_gen/kitex_gen/common"
 	"context"
 	"github.com/cloudwego/hertz/pkg/app"
+	"github.com/cloudwego/hertz/pkg/common/hlog"
 )
 
 type LogoutService struct {
@@ -22,6 +23,7 @@ func (h *LogoutService) Run(req *user.LogoutReq) (resp *common_hertz.Empty, err 
 
 	_, err = rpc.UserClient.Logout(h.Context, &common.Empty{})
 	if err != nil {
+		hlog.CtxErrorf(h.Context, "logout failed, err: %v", err.Error())
 		return nil, err
 	}
 	return nil, nil

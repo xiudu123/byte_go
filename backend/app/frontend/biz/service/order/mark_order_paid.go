@@ -27,7 +27,7 @@ func (h *MarkOrderPaidService) Run(req *order.MarkOrderPaidReq) (resp *order.Mar
 	})
 
 	if err != nil {
-		hlog.Error(err)
+		hlog.CtxErrorf(h.Context, "mark order paid failed, err: %v", err.Error())
 		return nil, err
 	}
 

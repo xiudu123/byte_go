@@ -29,7 +29,7 @@ func (h *ListProductsService) Run(req *product.ListProductsReq) (resp *product.L
 		CategoryName: req.CategoryName,
 	})
 	if err != nil {
-		hlog.Error(err)
+		hlog.CtxErrorf(h.Context, "list products failed, err: %v", err.Error())
 		return nil, err
 	}
 

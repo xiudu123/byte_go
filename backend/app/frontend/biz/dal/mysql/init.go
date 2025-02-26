@@ -6,6 +6,7 @@ import (
 	gormadapter "github.com/casbin/gorm-adapter/v3"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
+	"gorm.io/plugin/opentelemetry/tracing"
 	"os"
 )
 
@@ -32,7 +33,9 @@ func Init() {
 	if err != nil {
 		panic(err)
 	}
-
+	if err = DB.Use(tracing.NewPlugin(tracing.WithoutMetrics())); err != nil {
+		panic(err)
+	}
 	NeedDate = !DB.Migrator().HasTable(&gormadapter.CasbinRule{})
 	err = DB.AutoMigrate(&gormadapter.CasbinRule{})
 	if err != nil {

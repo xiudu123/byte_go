@@ -33,7 +33,7 @@ func (h *ChargeService) Run(req *payment.ChargeReq) (resp *payment.ChargeResp, e
 		},
 	})
 	if err != nil {
-		hlog.Error(err)
+		hlog.CtxErrorf(h.Context, "charge failed, err: %v", err.Error())
 		return nil, err
 	}
 

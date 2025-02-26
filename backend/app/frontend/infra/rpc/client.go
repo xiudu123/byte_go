@@ -9,12 +9,9 @@ import (
 	"byte_go/backend/rpc_gen/kitex_gen/payment/paymentservice"
 	"byte_go/backend/rpc_gen/kitex_gen/product/productcatalogservice"
 	"byte_go/backend/rpc_gen/kitex_gen/user/userservice"
+	"byte_go/backend/utils/clientsuite"
 	"github.com/cloudwego/hertz/pkg/common/hlog"
 	"github.com/cloudwego/kitex/client"
-	"github.com/cloudwego/kitex/pkg/discovery"
-	"github.com/cloudwego/kitex/pkg/transmeta"
-	"github.com/cloudwego/kitex/transport"
-	consul "github.com/kitex-contrib/registry-consul"
 	"sync"
 )
 
@@ -35,103 +32,108 @@ var (
 	CheckoutClient checkoutservice.Client
 	Once           sync.Once
 	err            error
+	ServiceName    = conf.GetConf().Hertz.Service
+	MetricsPort    = conf.GetConf().Hertz.MetricsPort
+	RegistryAddr   = conf.GetConf().Hertz.RegistryAddr
 )
 
 func Init() {
 	Once.Do(func() {
-		var r discovery.Resolver
-		r, err = consul.NewConsulResolver(conf.GetConf().Hertz.RegistryAddr)
-		if err != nil {
-			hlog.Fatal(err)
-		}
-		initUserClient(r)
-		initAuthClient(r)
-		initProductCatalogClient(r)
-		initCartClient(r)
-		initOrderClient(r)
-		initPaymentClient(r)
-		initCheckoutClient(r)
+		initUserClient()
+		initAuthClient()
+		initProductCatalogClient()
+		initCartClient()
+		initOrderClient()
+		initPaymentClient()
+		initCheckoutClient()
 	})
 }
 
-func initUserClient(r discovery.Resolver) {
+func initUserClient() {
 	UserClient, err = userservice.NewClient(
 		"user",
-		client.WithResolver(r),
-		client.WithMetaHandler(transmeta.ClientTTHeaderHandler),
-		client.WithTransportProtocol(transport.TTHeader),
+		client.WithSuite(clientsuite.CommonClientSuite{
+			CurrentServiceName: ServiceName,
+			RegistryAddr:       RegistryAddr,
+		}),
 	)
 	if err != nil {
 		hlog.Fatal(err)
 	}
 }
 
-func initAuthClient(r discovery.Resolver) {
+func initAuthClient() {
 	AuthClient, err = authservice.NewClient(
 		"auth",
-		client.WithResolver(r),
-		client.WithMetaHandler(transmeta.ClientTTHeaderHandler),
-		client.WithTransportProtocol(transport.TTHeader),
+		client.WithSuite(clientsuite.CommonClientSuite{
+			CurrentServiceName: ServiceName,
+			RegistryAddr:       RegistryAddr,
+		}),
 	)
 	if err != nil {
 		hlog.Fatal(err)
 	}
 }
 
-func initProductCatalogClient(r discovery.Resolver) {
+func initProductCatalogClient() {
 	ProductClient, err = productcatalogservice.NewClient(
 		"product",
-		client.WithResolver(r),
-		client.WithMetaHandler(transmeta.ClientTTHeaderHandler),
-		client.WithTransportProtocol(transport.TTHeader),
+		client.WithSuite(clientsuite.CommonClientSuite{
+			CurrentServiceName: ServiceName,
+			RegistryAddr:       RegistryAddr,
+		}),
 	)
 	if err != nil {
 		hlog.Fatal(err)
 	}
 }
 
-func initCartClient(r discovery.Resolver) {
+func initCartClient() {
 	CartClient, err = cartservice.NewClient(
 		"cart",
-		client.WithResolver(r),
-		client.WithMetaHandler(transmeta.ClientTTHeaderHandler),
-		client.WithTransportProtocol(transport.TTHeader),
+		client.WithSuite(clientsuite.CommonClientSuite{
+			CurrentServiceName: ServiceName,
+			RegistryAddr:       RegistryAddr,
+		}),
 	)
 	if err != nil {
 		hlog.Fatal(err)
 	}
 }
 
-func initOrderClient(r discovery.Resolver) {
+func initOrderClient() {
 	OrderClient, err = orderservice.NewClient(
 		"order",
-		client.WithResolver(r),
-		client.WithMetaHandler(transmeta.ClientTTHeaderHandler),
-		client.WithTransportProtocol(transport.TTHeader),
+		client.WithSuite(clientsuite.CommonClientSuite{
+			CurrentServiceName: ServiceName,
+			RegistryAddr:       RegistryAddr,
+		}),
 	)
 	if err != nil {
 		hlog.Fatal(err)
 	}
 }
 
-func initPaymentClient(r discovery.Resolver) {
+func initPaymentClient() {
 	PaymentClient, err = paymentservice.NewClient(
 		"payment",
-		client.WithResolver(r),
-		client.WithMetaHandler(transmeta.ClientTTHeaderHandler),
-		client.WithTransportProtocol(transport.TTHeader),
+		client.WithSuite(clientsuite.CommonClientSuite{
+			CurrentServiceName: ServiceName,
+			RegistryAddr:       RegistryAddr,
+		}),
 	)
 	if err != nil {
 		hlog.Fatal(err)
 	}
 }
 
-func initCheckoutClient(r discovery.Resolver) {
+func initCheckoutClient() {
 	CheckoutClient, err = checkoutservice.NewClient(
 		"checkout",
-		client.WithResolver(r),
-		client.WithMetaHandler(transmeta.ClientTTHeaderHandler),
-		client.WithTransportProtocol(transport.TTHeader),
+		client.WithSuite(clientsuite.CommonClientSuite{
+			CurrentServiceName: ServiceName,
+			RegistryAddr:       RegistryAddr,
+		}),
 	)
 	if err != nil {
 		hlog.Fatal(err)

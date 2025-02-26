@@ -7,6 +7,7 @@ import (
 	rpcOrder "byte_go/backend/rpc_gen/kitex_gen/order"
 	"context"
 	"github.com/cloudwego/hertz/pkg/app"
+	"github.com/cloudwego/hertz/pkg/common/hlog"
 )
 
 type ListOrderService struct {
@@ -24,6 +25,7 @@ func (h *ListOrderService) Run(req *order.ListOrderReq) (resp *order.ListOrderRe
 	})
 
 	if err != nil {
+		hlog.CtxErrorf(h.Context, "list order failed, err: %v", err.Error())
 		return nil, err
 	}
 

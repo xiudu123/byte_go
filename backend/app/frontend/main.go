@@ -7,7 +7,9 @@ import (
 	"byte_go/backend/app/front/casbin"
 	"byte_go/backend/app/front/infra/rpc"
 	"byte_go/backend/app/front/middleware"
+	"byte_go/backend/utils/mtl"
 	"context"
+	prometheus "github.com/hertz-contrib/monitor-prometheus"
 	"github.com/joho/godotenv"
 	"time"
 
@@ -23,24 +25,49 @@ import (
 	"github.com/hertz-contrib/gzip"
 	"github.com/hertz-contrib/logger/accesslog"
 	hertzlogrus "github.com/hertz-contrib/logger/logrus"
+	hertzobslogrus "github.com/hertz-contrib/obs-opentelemetry/logging/logrus"
+	hertztracing "github.com/hertz-contrib/obs-opentelemetry/tracing"
 	"github.com/hertz-contrib/pprof"
 	"go.uber.org/zap/zapcore"
 	"gopkg.in/natefinch/lumberjack.v2"
 )
 
+var (
+	ServiceName  = conf.GetConf().Hertz.Service
+	MetricsPort  = conf.GetConf().Hertz.MetricsPort
+	RegistryAddr = conf.GetConf().Hertz.RegistryAddr
+)
+
 func main() {
 	// init dal
 	_ = godotenv.Load()
+	p := mtl.InitTracing(ServiceName)
+	defer p.Shutdown(context.Background())
+	consul, registryInfo := mtl.InitMetric(ServiceName, MetricsPort, RegistryAddr)
+	defer consul.Deregister(registryInfo)
 	dal.Init()
 	rpc.Init()
 	casbin.InitCasbin()
 	address := conf.GetConf().Hertz.Address
-	h := server.New(server.WithHostPorts(address))
 
+	tracer, cfg := hertztracing.NewServerTracer()
+
+	h := server.New(server.WithHostPorts(address),
+		server.WithTracer(prometheus.NewServerTracer(
+			"",
+			"",
+			prometheus.WithRegistry(mtl.Registry),
+			prometheus.WithDisableServer(true),
+		)),
+		tracer,
+	)
+
+	h.Use(hertztracing.ServerMiddleware(cfg))
 	registerMiddleware(h)
 
 	// add a ping route to test
 	h.GET("/ping", func(c context.Context, ctx *app.RequestContext) {
+		hlog.CtxInfof(c, "ping pong")
 		ctx.JSON(consts.StatusOK, utils.H{"ping": "pong"})
 	})
 
@@ -51,9 +78,15 @@ func main() {
 
 func registerMiddleware(h *server.Hertz) {
 	// log
-	logger := hertzlogrus.NewLogger()
+	logger := hertzobslogrus.NewLogger(hertzobslogrus.WithLogger(hertzlogrus.NewLogger().Logger()))
 	hlog.SetLogger(logger)
 	hlog.SetLevel(conf.LogLevel())
+	var flushInterval time.Duration
+	if conf.GetEnv() == "online" {
+		flushInterval = time.Minute
+	} else {
+		flushInterval = time.Second
+	}
 	asyncWriter := &zapcore.BufferedWriteSyncer{
 		WS: zapcore.AddSync(&lumberjack.Logger{
 			Filename:   conf.GetConf().Hertz.LogFileName,
@@ -61,7 +94,7 @@ func registerMiddleware(h *server.Hertz) {
 			MaxBackups: conf.GetConf().Hertz.LogMaxBackups,
 			MaxAge:     conf.GetConf().Hertz.LogMaxAge,
 		}),
-		FlushInterval: time.Minute,
+		FlushInterval: flushInterval,
 	}
 	hlog.SetOutput(asyncWriter)
 	h.OnShutdown = append(h.OnShutdown, func(ctx context.Context) {

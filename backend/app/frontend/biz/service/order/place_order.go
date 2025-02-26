@@ -49,7 +49,7 @@ func (h *PlaceOrderService) Run(req *order.PlaceOrderReq) (resp *order.PlaceOrde
 	})
 
 	if err != nil {
-		hlog.Error(err)
+		hlog.CtxErrorf(h.Context, "place order failed, err: %v", err.Error())
 		return nil, err
 	}
 

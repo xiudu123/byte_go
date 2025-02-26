@@ -7,6 +7,7 @@ import (
 	"context"
 	"errors"
 	"github.com/cloudwego/hertz/pkg/app"
+	"github.com/cloudwego/kitex/pkg/klog"
 )
 
 type GetUserInfoService struct {
@@ -40,6 +41,11 @@ func (h *GetUserInfoService) Run(req *user.GetUserInfoReq) (resp *user.GetUserIn
 	}
 
 	if err != nil {
+		if req.Email != "" {
+			klog.CtxErrorf(h.Context, "get user [%s] info failed, err: %v", req.Email, err.Error())
+		} else {
+			klog.CtxErrorf(h.Context, "get user [%d] info failed, err: %v", req.UserId, err.Error())
+		}
 		return nil, err
 	}
 

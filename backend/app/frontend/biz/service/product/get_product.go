@@ -25,7 +25,7 @@ func (h *GetProductService) Run(req *product.GetProductReq) (resp *product.GetPr
 
 	// 封装返回
 	if err != nil {
-		hlog.Error(err)
+		hlog.CtxErrorf(h.Context, "get product [%d] failed, err: %v", req.ProductId, err.Error())
 		return nil, err
 	}
 	return &product.GetProductResp{

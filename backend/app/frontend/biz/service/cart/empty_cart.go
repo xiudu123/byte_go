@@ -21,7 +21,7 @@ func NewEmptyCartService(Context context.Context, RequestContext *app.RequestCon
 func (h *EmptyCartService) Run(req *cart.EmptyCartReq) (resp *cart.EmptyCartResp, err error) {
 	_, err = rpc.CartClient.EmptyCart(h.Context, &rpcCart.EmptyCartReq{UserId: req.UserId})
 	if err != nil {
-		hlog.Error(err)
+		hlog.CtxErrorf(h.Context, "empty cart failed, err: %v", err.Error())
 		return nil, err
 	}
 	return

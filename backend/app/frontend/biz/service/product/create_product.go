@@ -29,7 +29,7 @@ func (h *CreateProductService) Run(req *product.CreateProductReq) (resp *product
 		Categories:  req.Categories,
 	})
 	if err != nil {
-		hlog.Error(err)
+		hlog.CtxErrorf(h.Context, "create product [%s] failed, err: %v", req.Name, err.Error())
 		return
 	}
 	// 封装返回

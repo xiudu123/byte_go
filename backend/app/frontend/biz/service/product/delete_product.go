@@ -4,6 +4,7 @@ import (
 	"byte_go/backend/app/front/infra/rpc"
 	rpcProduct "byte_go/backend/rpc_gen/kitex_gen/product"
 	"context"
+	"github.com/cloudwego/hertz/pkg/common/hlog"
 
 	product "byte_go/backend/app/front/hertz_gen/frontend/product"
 	"github.com/cloudwego/hertz/pkg/app"
@@ -24,6 +25,7 @@ func (h *DeleteProductService) Run(req *product.DeleteProductReq) (resp *product
 		ProductId: req.ProductId,
 	})
 	if err != nil {
+		hlog.CtxErrorf(h.Context, "delete product [%d] failed, err: %v", req.ProductId, err.Error())
 		return nil, err
 	}
 

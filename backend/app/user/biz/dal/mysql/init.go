@@ -4,6 +4,7 @@ import (
 	"byte_go/backend/app/user/biz/model"
 	"byte_go/backend/app/user/conf"
 	"fmt"
+	"gorm.io/plugin/opentelemetry/tracing"
 	"os"
 
 	"gorm.io/driver/mysql"
@@ -29,6 +30,9 @@ func Init() {
 		},
 	)
 	if err != nil {
+		panic(err)
+	}
+	if err = DB.Use(tracing.NewPlugin(tracing.WithoutMetrics())); err != nil {
 		panic(err)
 	}
 	err = DB.AutoMigrate(&model.User{})

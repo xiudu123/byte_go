@@ -27,7 +27,7 @@ func (h *SearchProductsService) Run(req *product.SearchProductsReq) (resp *produ
 		Query: req.Query,
 	})
 	if err != nil {
-		hlog.Error(err)
+		hlog.CtxErrorf(h.Context, "search products [%s] failed, err: %v", req.Query, err.Error())
 		return nil, err
 	}
 

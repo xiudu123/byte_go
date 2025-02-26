@@ -2,6 +2,7 @@ package casbin
 
 import (
 	"byte_go/backend/app/front/biz/dal/mysql"
+	"byte_go/backend/app/front/conf"
 	"github.com/casbin/casbin/v2"
 	"github.com/casbin/casbin/v2/model"
 	gormadapter "github.com/casbin/gorm-adapter/v3"
@@ -37,26 +38,30 @@ func InitCasbin() {
 }
 
 func initPagePermission() {
-	_ = AddPolicyRole(UserRole, "user/register", "post")
-	_ = AddPolicyRole(UserRole, "user/login", "post")
-	_ = AddPolicyRole(UserRole, "user/logout", "post")
-	_ = AddPolicyRole(UserRole, "user/get/*", "get")
-	_ = AddPolicyRole(UserRole, "user/update", "post")
-	_ = AddPolicyRole(UserRole, "products/get/*", "get")
-	_ = AddPolicyRole(UserRole, "products/list", "get")
-	_ = AddPolicyRole(UserRole, "products/search", "get")
-	_ = AddPolicyRole(UserRole, "cart/add", "post")
-	_ = AddPolicyRole(UserRole, "cart/get", "get")
-	_ = AddPolicyRole(UserRole, "cart/empty", "post")
-	_ = AddPolicyRole(UserRole, "cart/place", "post")
-	_ = AddPolicyRole(UserRole, "cart/list", "get")
-	_ = AddPolicyRole(UserRole, "cart/mark_paid", "post")
-	_ = AddPolicyRole(UserRole, "payment/charge", "post")
-	_ = AddPolicyRole(UserRole, "checkout", "post")
-	_ = AddPolicyRole(AdminRole, "user/delete/*", "post")
-	_ = AddPolicyRole(MerchantRole, "products/create", "post")
-	_ = AddPolicyRole(MerchantRole, "products/delete/*", "get")
-	_ = AddPolicyRole(MerchantRole, "products/update/*", "post")
+	_ = AddPolicyRole(UserRole, "user/register", "POST")
+	_ = AddPolicyRole(UserRole, "user/login", "POST")
+	_ = AddPolicyRole(UserRole, "user/logout", "POST")
+	_ = AddPolicyRole(UserRole, "user/get/*", "GET")
+	_ = AddPolicyRole(UserRole, "user/update", "POST")
+	_ = AddPolicyRole(UserRole, "products/get/*", "GET")
+	_ = AddPolicyRole(UserRole, "products/list", "GET")
+	_ = AddPolicyRole(UserRole, "products/search", "GET")
+	_ = AddPolicyRole(UserRole, "cart/add", "POST")
+	_ = AddPolicyRole(UserRole, "cart/get", "GET")
+	_ = AddPolicyRole(UserRole, "cart/empty", "POST")
+	_ = AddPolicyRole(UserRole, "cart/place", "POST")
+	_ = AddPolicyRole(UserRole, "cart/list", "GET")
+	_ = AddPolicyRole(UserRole, "cart/mark_paid", "POST")
+	_ = AddPolicyRole(UserRole, "payment/charge", "POST")
+	_ = AddPolicyRole(UserRole, "checkout", "POST")
+	_ = AddPolicyRole(AdminRole, "user/delete/*", "POST")
+	_ = AddPolicyRole(MerchantRole, "products/create", "POST")
+	_ = AddPolicyRole(MerchantRole, "products/delete/*", "GET")
+	_ = AddPolicyRole(MerchantRole, "products/update/*", "POST")
+	if conf.GetEnv() != "test" {
+		_ = AddRoleForUser(1, "user")
+		_ = AddRoleForUser(1, "admin")
+	}
 }
 
 func AddPolicyRole(role string, path string, method string) (err error) {

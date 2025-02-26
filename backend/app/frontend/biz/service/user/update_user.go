@@ -6,6 +6,7 @@ import (
 	rpcUser "byte_go/backend/rpc_gen/kitex_gen/user"
 	"context"
 	"github.com/cloudwego/hertz/pkg/app"
+	"github.com/cloudwego/hertz/pkg/common/hlog"
 )
 
 type UpdateUserService struct {
@@ -25,6 +26,7 @@ func (h *UpdateUserService) Run(req *user.UpdateUserReq) (resp *user.UpdateUserR
 		AvatarUrl: req.AvatarUrl,
 	})
 	if err != nil {
+		hlog.CtxErrorf(h.Context, "update user [%d] failed, err: %v", req.UserId, err.Error())
 		return nil, err
 	}
 	return &user.UpdateUserResp{

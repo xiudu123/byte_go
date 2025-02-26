@@ -43,7 +43,7 @@ func (h *CheckoutService) Run(req *checkout.CheckoutReq) (resp *checkout.Checkou
 	})
 
 	if err != nil {
-		hlog.Error(err)
+		hlog.CtxErrorf(h.Context, "checkout failed, err: %v", err.Error())
 		return nil, err
 	}
 

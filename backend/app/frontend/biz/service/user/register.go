@@ -30,12 +30,12 @@ func (h *RegisterService) Run(req *user.RegisterReq) (resp *user.RegisterResp, e
 	})
 
 	if err != nil {
-		hlog.Error(err)
+		hlog.CtxErrorf(h.Context, "register user [%s] failed, err: %v", req.Email, err.Error())
 		return nil, err
 	}
 
 	if err = casbin.AddRoleForUser(userResp.User.UserId, casbin.UserRole); err != nil {
-		hlog.Error(err)
+		hlog.CtxErrorf(h.Context, "add role [%s] for user [%d] failed, err: %v", casbin.UserRole, userResp.User.UserId, err.Error())
 		return nil, err
 	}
 

@@ -3,11 +3,9 @@ package rpc
 import (
 	"byte_go/backend/app/user/conf"
 	"byte_go/backend/rpc_gen/kitex_gen/auth/authservice"
+	"byte_go/backend/utils/clientsuite"
 	"github.com/cloudwego/kitex/client"
-	"github.com/cloudwego/kitex/pkg/rpcinfo"
-	"github.com/cloudwego/kitex/pkg/transmeta"
-	"github.com/cloudwego/kitex/transport"
-	consul "github.com/kitex-contrib/registry-consul"
+	"github.com/cloudwego/kitex/pkg/klog"
 	"sync"
 )
 
@@ -19,8 +17,11 @@ import (
  */
 
 var (
-	AuthClient authservice.Client
-	once       sync.Once
+	AuthClient   authservice.Client
+	once         sync.Once
+	ServiceName  = conf.GetConf().Kitex.Service
+	RegistryAddr = conf.GetConf().Registry.RegistryAddress[0]
+	err          error
 )
 
 func InitClient() {
@@ -30,19 +31,14 @@ func InitClient() {
 }
 
 func initAuthClient() {
-	var opts []client.Option
-	r, err := consul.NewConsulResolver(conf.GetConf().Registry.RegistryAddress[0])
-	if err != nil {
-		panic(err)
+	opts := []client.Option{
+		client.WithSuite(clientsuite.CommonClientSuite{
+			CurrentServiceName: ServiceName,
+			RegistryAddr:       RegistryAddr,
+		}),
 	}
-	opts = append(opts,
-		client.WithResolver(r),
-		client.WithClientBasicInfo(&rpcinfo.EndpointBasicInfo{ServiceName: conf.GetConf().Kitex.Service}),
-		client.WithTransportProtocol(transport.GRPC),
-		client.WithMetaHandler(transmeta.ClientHTTP2Handler),
-	)
 	AuthClient, err = authservice.NewClient("auth", opts...)
 	if err != nil {
-		panic(err)
+		klog.Fatalf("init auth client failed: %v", err)
 	}
 }

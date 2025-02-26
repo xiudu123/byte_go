@@ -24,7 +24,7 @@ func (h *AddItemService) Run(req *cart.AddItemReq) (resp *cart.AddItemResp, err 
 	_, err = rpc.CartClient.AddItem(h.Context, &rpcCart.AddItemReq{UserId: req.UserId, Item: utils.CartItemHertz2Gen(req.Item)})
 
 	if err != nil {
-		hlog.Error(err)
+		hlog.CtxErrorf(h.Context, "add item [%v] failed, err: %v", req.Item, err.Error())
 		return nil, err
 	}
 

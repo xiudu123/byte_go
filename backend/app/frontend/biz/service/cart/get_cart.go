@@ -25,7 +25,7 @@ func (h *GetCartService) Run(req *cart.GetCartReq) (resp *cart.GetCartResp, err 
 	cartResult, err := rpc.CartClient.GetCart(h.Context, &rpcCart.GetCartReq{UserId: req.UserId})
 
 	if err != nil {
-		hlog.Error(err)
+		hlog.CtxErrorf(h.Context, "get cart failed, err: %v", err.Error())
 		return nil, err
 	}
 

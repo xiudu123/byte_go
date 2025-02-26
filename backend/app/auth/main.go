@@ -2,8 +2,9 @@ package main
 
 import (
 	"byte_go/backend/app/auth/biz/dal"
-	"github.com/cloudwego/kitex/pkg/transmeta"
-	consul "github.com/kitex-contrib/registry-consul"
+	"byte_go/backend/utils/mtl"
+	"byte_go/backend/utils/serversuite"
+	"context"
 	"net"
 	"time"
 
@@ -17,7 +18,15 @@ import (
 	"gopkg.in/natefinch/lumberjack.v2"
 )
 
+var (
+	ServiceName  = conf.GetConf().Kitex.Service
+	RegistryAddr = conf.GetConf().Registry.RegistryAddress[0]
+)
+
 func main() {
+	mtl.InitMetric(ServiceName, conf.GetConf().Kitex.MetricsPort, RegistryAddr)
+	p := mtl.InitTracing(ServiceName)
+	defer p.Shutdown(context.Background())
 	dal.Init()
 	opts := kitexInit()
 
@@ -38,17 +47,15 @@ func kitexInit() (opts []server.Option) {
 	opts = append(opts, server.WithServiceAddr(addr))
 
 	// service info
-	opts = append(opts, server.WithServerBasicInfo(&rpcinfo.EndpointBasicInfo{
-		ServiceName: conf.GetConf().Kitex.Service,
-	}))
-
-	// consul register
-	r, err := consul.NewConsulRegister(conf.GetConf().Registry.RegistryAddress[0])
-	if err != nil {
-		klog.Fatal(err)
-	}
-	opts = append(opts, server.WithRegistry(r), server.WithMetaHandler(transmeta.ServerTTHeaderHandler))
-
+	opts = append(opts,
+		server.WithServerBasicInfo(&rpcinfo.EndpointBasicInfo{
+			ServiceName: conf.GetConf().Kitex.Service,
+		}),
+		server.WithSuite(serversuite.CommonServerSuite{
+			CurrentServerName: ServiceName,
+			RegistryAddr:      RegistryAddr,
+		}),
+	)
 	// klog
 	logger := kitexlogrus.NewLogger()
 	klog.SetLogger(logger)

@@ -1,6 +1,7 @@
 kitex:
   service: "auth"
   address: "192.168.163.1:8881"
+  metrics_port: "192.168.163.1:9991"
   log_level: info
   log_file_name: "log/kitex.log"
   log_max_size: 10

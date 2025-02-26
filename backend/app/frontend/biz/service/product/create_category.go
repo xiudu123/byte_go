@@ -1,13 +1,12 @@
 package product
 
 import (
+	product "byte_go/backend/app/front/hertz_gen/frontend/product"
 	"byte_go/backend/app/front/infra/rpc"
 	rpcProduct "byte_go/backend/rpc_gen/kitex_gen/product"
 	"context"
-	"github.com/cloudwego/hertz/pkg/common/hlog"
-
-	product "byte_go/backend/app/front/hertz_gen/frontend/product"
 	"github.com/cloudwego/hertz/pkg/app"
+	"github.com/cloudwego/hertz/pkg/common/hlog"
 )
 
 type CreateCategoryService struct {
@@ -26,7 +25,7 @@ func (h *CreateCategoryService) Run(req *product.CreateCategoryReq) (resp *produ
 		Name: req.Name,
 	})
 	if err != nil {
-		hlog.Error(err)
+		hlog.CtxErrorf(h.Context, "create category [%s] failed, err: %v", req.Name, err.Error())
 		return
 	}
 	// 封装返回

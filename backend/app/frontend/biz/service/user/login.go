@@ -6,7 +6,7 @@ import (
 	rpcUser "byte_go/backend/rpc_gen/kitex_gen/user"
 	"context"
 	"github.com/cloudwego/hertz/pkg/app"
-	"github.com/cloudwego/hertz/pkg/common/hlog"
+	"github.com/cloudwego/kitex/pkg/klog"
 )
 
 type LoginService struct {
@@ -26,7 +26,7 @@ func (h *LoginService) Run(req *user.LoginReq) (resp *user.LoginResp, err error)
 	})
 
 	if err != nil {
-		hlog.Error(err)
+		klog.CtxErrorf(h.Context, "login user [%s] failed, err: %v", req.Email, err.Error())
 		return nil, err
 	}
 

@@ -6,12 +6,9 @@ import (
 	"byte_go/backend/rpc_gen/kitex_gen/order/orderservice"
 	"byte_go/backend/rpc_gen/kitex_gen/payment/paymentservice"
 	"byte_go/backend/rpc_gen/kitex_gen/product/productcatalogservice"
+	"byte_go/backend/utils/clientsuite"
 	"github.com/cloudwego/kitex/client"
-	"github.com/cloudwego/kitex/pkg/discovery"
 	"github.com/cloudwego/kitex/pkg/klog"
-	"github.com/cloudwego/kitex/pkg/transmeta"
-	"github.com/cloudwego/kitex/transport"
-	consul "github.com/kitex-contrib/registry-consul"
 	"sync"
 )
 
@@ -29,66 +26,49 @@ var (
 	PaymentClient paymentservice.Client
 	once          sync.Once
 	err           error
+	ServiceName   = conf.GetConf().Kitex.Service
+	RegistryAddr  = conf.GetConf().Registry.RegistryAddress[0]
 )
 
 func InitClient() {
 	once.Do(func() {
-		var r discovery.Resolver
-		r, err = consul.NewConsulResolver(conf.GetConf().Registry.RegistryAddress[0])
-		if err != nil {
-			klog.Fatal(err)
+		opts := []client.Option{
+			client.WithSuite(clientsuite.CommonClientSuite{
+				CurrentServiceName: ServiceName,
+				RegistryAddr:       RegistryAddr,
+			}),
 		}
-		initCartClient(r)
-		initProductClient(r)
-		initOrderClient(r)
-		initPaymentClient(r)
+		initCartClient(opts)
+		initProductClient(opts)
+		initOrderClient(opts)
+		initPaymentClient(opts)
 	})
 }
 
-func initCartClient(r discovery.Resolver) {
-	CartClient, err = cartservice.NewClient(
-		"cart",
-		client.WithResolver(r),
-		client.WithMetaHandler(transmeta.ClientTTHeaderHandler),
-		client.WithTransportProtocol(transport.TTHeader),
-	)
+func initCartClient(opts []client.Option) {
+	CartClient, err = cartservice.NewClient("cart", opts...)
 	if err != nil {
-		klog.Fatal(err)
+		klog.Fatalf("init cart client failed: %v", err)
 	}
 }
 
-func initProductClient(r discovery.Resolver) {
-	ProductClient, err = productcatalogservice.NewClient(
-		"product",
-		client.WithResolver(r),
-		client.WithMetaHandler(transmeta.ClientTTHeaderHandler),
-		client.WithTransportProtocol(transport.TTHeader),
-	)
+func initProductClient(opts []client.Option) {
+	ProductClient, err = productcatalogservice.NewClient("product", opts...)
 	if err != nil {
-		klog.Fatal(err)
+		klog.Fatalf("init product client failed: %v", err)
 	}
 }
 
-func initOrderClient(r discovery.Resolver) {
-	OrderClient, err = orderservice.NewClient(
-		"order",
-		client.WithResolver(r),
-		client.WithMetaHandler(transmeta.ClientTTHeaderHandler),
-		client.WithTransportProtocol(transport.TTHeader),
-	)
+func initOrderClient(opts []client.Option) {
+	OrderClient, err = orderservice.NewClient("order", opts...)
 	if err != nil {
-		klog.Fatal(err)
+		klog.Fatalf("init order client failed: %v", err)
 	}
 }
 
-func initPaymentClient(r discovery.Resolver) {
-	PaymentClient, err = paymentservice.NewClient(
-		"payment",
-		client.WithResolver(r),
-		client.WithMetaHandler(transmeta.ClientTTHeaderHandler),
-		client.WithTransportProtocol(transport.TTHeader),
-	)
+func initPaymentClient(opts []client.Option) {
+	PaymentClient, err = paymentservice.NewClient("payment", opts...)
 	if err != nil {
-		klog.Fatal(err)
+		klog.Fatalf("init payment client failed: %v", err)
 	}
 }
