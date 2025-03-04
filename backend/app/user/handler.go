@@ -32,7 +32,7 @@ func (s *UserServiceImpl) GetUserInfo(ctx context.Context, req *user.GetUserInfo
 }
 
 // Logout implements the UserServiceImpl interface.
-func (s *UserServiceImpl) Logout(ctx context.Context, req *common.Empty) (resp *common.Empty, err error) {
+func (s *UserServiceImpl) Logout(ctx context.Context, req *user.LogoutReq) (resp *common.Empty, err error) {
 	resp, err = service.NewLogoutService(ctx).Run(req)
 
 	return resp, err

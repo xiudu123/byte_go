@@ -587,7 +587,7 @@ func logoutHandler(ctx context.Context, handler interface{}, arg, result interfa
 	switch s := arg.(type) {
 	case *streaming.Args:
 		st := s.Stream
-		req := new(common.Empty)
+		req := new(user.LogoutReq)
 		if err := st.RecvMsg(req); err != nil {
 			return err
 		}
@@ -617,12 +617,12 @@ func newLogoutResult() interface{} {
 }
 
 type LogoutArgs struct {
-	Req *common.Empty
+	Req *user.LogoutReq
 }
 
 func (p *LogoutArgs) FastRead(buf []byte, _type int8, number int32) (n int, err error) {
 	if !p.IsSetReq() {
-		p.Req = new(common.Empty)
+		p.Req = new(user.LogoutReq)
 	}
 	return p.Req.FastRead(buf, _type, number)
 }
@@ -649,7 +649,7 @@ func (p *LogoutArgs) Marshal(out []byte) ([]byte, error) {
 }
 
 func (p *LogoutArgs) Unmarshal(in []byte) error {
-	msg := new(common.Empty)
+	msg := new(user.LogoutReq)
 	if err := proto.Unmarshal(in, msg); err != nil {
 		return err
 	}
@@ -657,9 +657,9 @@ func (p *LogoutArgs) Unmarshal(in []byte) error {
 	return nil
 }
 
-var LogoutArgs_Req_DEFAULT *common.Empty
+var LogoutArgs_Req_DEFAULT *user.LogoutReq
 
-func (p *LogoutArgs) GetReq() *common.Empty {
+func (p *LogoutArgs) GetReq() *user.LogoutReq {
 	if !p.IsSetReq() {
 		return LogoutArgs_Req_DEFAULT
 	}
@@ -1082,7 +1082,7 @@ func (p *kClient) GetUserInfo(ctx context.Context, Req *user.GetUserInfoReq) (r 
 	return _result.GetSuccess(), nil
 }
 
-func (p *kClient) Logout(ctx context.Context, Req *common.Empty) (r *common.Empty, err error) {
+func (p *kClient) Logout(ctx context.Context, Req *user.LogoutReq) (r *common.Empty, err error) {
 	var _args LogoutArgs
 	_args.Req = Req
 	var _result LogoutResult

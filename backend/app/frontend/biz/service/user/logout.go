@@ -4,7 +4,7 @@ import (
 	"byte_go/backend/app/front/hertz_gen/frontend/common_hertz"
 	user "byte_go/backend/app/front/hertz_gen/frontend/user"
 	"byte_go/backend/app/front/infra/rpc"
-	"byte_go/backend/rpc_gen/kitex_gen/common"
+	rpcUser "byte_go/backend/rpc_gen/kitex_gen/user"
 	"context"
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/common/hlog"
@@ -20,8 +20,10 @@ func NewLogoutService(Context context.Context, RequestContext *app.RequestContex
 }
 
 func (h *LogoutService) Run(req *user.LogoutReq) (resp *common_hertz.Empty, err error) {
-
-	_, err = rpc.UserClient.Logout(h.Context, &common.Empty{})
+	jti, _ := h.RequestContext.Get("jti")
+	_, err = rpc.UserClient.Logout(h.Context, &rpcUser.LogoutReq{
+		Jti: jti.(string),
+	})
 	if err != nil {
 		hlog.CtxErrorf(h.Context, "logout failed, err: %v", err.Error())
 		return nil, err

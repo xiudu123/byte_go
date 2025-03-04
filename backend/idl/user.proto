@@ -9,7 +9,7 @@ service UserService {
   rpc Register(RegisterReq) returns (RegisterResp) {}
   rpc Login(LoginReq) returns (LoginResp) {}
   rpc GetUserInfo(GetUserInfoReq) returns (GetUserInfoResp) {}
-  rpc Logout(common.Empty) returns (common.Empty) {}
+  rpc Logout(LogoutReq) returns (common.Empty) {}
   rpc DeleteUser(DeleteUserReq) returns (common.Empty) {}
   rpc UpdateUser(UpdateUserReq) returns (UpdateUserResp) {}
 }
@@ -49,6 +49,10 @@ message UpdateUserReq {
   uint32 user_id = 1;
   string username = 2;
   string avatar_url = 3;
+}
+
+message LogoutReq {
+  string jti = 1;
 }
 
 message RegisterResp {

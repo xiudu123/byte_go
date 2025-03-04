@@ -58,9 +58,13 @@ func initPagePermission() {
 	_ = AddPolicyRole(MerchantRole, "products/create", "POST")
 	_ = AddPolicyRole(MerchantRole, "products/delete/*", "GET")
 	_ = AddPolicyRole(MerchantRole, "products/update/*", "POST")
-	if conf.GetEnv() != "test" {
-		_ = AddRoleForUser(1, "user")
-		_ = AddRoleForUser(1, "admin")
+	if conf.GetEnv() == "test" {
+		_ = AddRoleForUser(1, UserRole)
+		_ = AddRoleForUser(1, MerchantRole)
+		_ = AddRoleForUser(1, AdminRole)
+		_ = AddRoleForUser(2, UserRole)
+		_ = AddRoleForUser(2, MerchantRole)
+		_ = AddRoleForUser(3, UserRole)
 	}
 }
 

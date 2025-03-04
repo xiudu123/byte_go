@@ -26,8 +26,9 @@ func (s CommonClientSuite) Options() []client.Option {
 		client.WithClientBasicInfo(&rpcinfo.EndpointBasicInfo{
 			ServiceName: s.CurrentServiceName,
 		}),
-		client.WithMetaHandler(transmeta.ClientHTTP2Handler),
+		client.WithMetaHandler(transmeta.ClientTTHeaderHandler),
 		client.WithTransportProtocol(transport.GRPC),
+		//client.WithShortConnection(),
 		client.WithSuite(tracing.NewClientSuite()),
 	}
 	r, err := consul.NewConsulResolver(s.RegistryAddr)

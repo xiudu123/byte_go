@@ -16,7 +16,7 @@ type RPCClient interface {
 	Register(ctx context.Context, Req *user.RegisterReq, callOptions ...callopt.Option) (r *user.RegisterResp, err error)
 	Login(ctx context.Context, Req *user.LoginReq, callOptions ...callopt.Option) (r *user.LoginResp, err error)
 	GetUserInfo(ctx context.Context, Req *user.GetUserInfoReq, callOptions ...callopt.Option) (r *user.GetUserInfoResp, err error)
-	Logout(ctx context.Context, Req *common.Empty, callOptions ...callopt.Option) (r *common.Empty, err error)
+	Logout(ctx context.Context, Req *user.LogoutReq, callOptions ...callopt.Option) (r *common.Empty, err error)
 	DeleteUser(ctx context.Context, Req *user.DeleteUserReq, callOptions ...callopt.Option) (r *common.Empty, err error)
 	UpdateUser(ctx context.Context, Req *user.UpdateUserReq, callOptions ...callopt.Option) (r *user.UpdateUserResp, err error)
 }
@@ -59,7 +59,7 @@ func (c *clientImpl) GetUserInfo(ctx context.Context, Req *user.GetUserInfoReq, 
 	return c.kitexClient.GetUserInfo(ctx, Req, callOptions...)
 }
 
-func (c *clientImpl) Logout(ctx context.Context, Req *common.Empty, callOptions ...callopt.Option) (r *common.Empty, err error) {
+func (c *clientImpl) Logout(ctx context.Context, Req *user.LogoutReq, callOptions ...callopt.Option) (r *common.Empty, err error) {
 	return c.kitexClient.Logout(ctx, Req, callOptions...)
 }
 

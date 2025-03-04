@@ -35,7 +35,7 @@ func GetUserInfo(ctx context.Context, req *user.GetUserInfoReq, callOptions ...c
 	return resp, nil
 }
 
-func Logout(ctx context.Context, req *common.Empty, callOptions ...callopt.Option) (resp *common.Empty, err error) {
+func Logout(ctx context.Context, req *user.LogoutReq, callOptions ...callopt.Option) (resp *common.Empty, err error) {
 	resp, err = defaultClient.Logout(ctx, req, callOptions...)
 	if err != nil {
 		klog.CtxErrorf(ctx, "Logout call failed,err =%+v", err)

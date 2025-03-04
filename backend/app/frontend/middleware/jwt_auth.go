@@ -3,11 +3,8 @@ package middleware
 import (
 	"byte_go/backend/app/front/casbin"
 	"byte_go/backend/app/front/infra/rpc"
-	"byte_go/backend/constants"
 	rpcAuth "byte_go/backend/rpc_gen/kitex_gen/auth"
 	"context"
-	"encoding/json"
-	"github.com/bytedance/gopkg/cloud/metainfo"
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/common/hlog"
 	"regexp"
@@ -46,7 +43,7 @@ func JwtAuthMiddleware() app.HandlerFunc {
 			return
 		}
 
-		claimsJson, _ := json.Marshal(claims)
+		//claimsJson, _ := json.Marshal(claims)
 
 		ok, err := casbin.CheckPermission(claims.UserId, currentPath, string(ctx.Method()))
 		if err != nil {
@@ -59,7 +56,7 @@ func JwtAuthMiddleware() app.HandlerFunc {
 			ctx.AbortWithStatusJSON(401, "无权限")
 		}
 
-		c = metainfo.WithValue(c, constants.JwtClaimsKey, string(claimsJson))
+		ctx.Set("jti", claims.Jti)
 		ctx.Next(c)
 	}
 }

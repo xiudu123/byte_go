@@ -25,7 +25,7 @@ type CommonServerSuite struct {
 
 func (s CommonServerSuite) Options() []server.Option {
 	opts := []server.Option{
-		server.WithMetaHandler(transmeta.ServerHTTP2Handler),
+		server.WithMetaHandler(transmeta.ClientTTHeaderHandler),
 		server.WithServerBasicInfo(&rpcinfo.EndpointBasicInfo{
 			ServiceName: s.CurrentServerName,
 		}),
@@ -40,7 +40,7 @@ func (s CommonServerSuite) Options() []server.Option {
 	if err != nil {
 		klog.Fatal(err)
 	}
-	opts = append(opts, server.WithRegistry(r), server.WithMetaHandler(transmeta.ServerTTHeaderHandler))
+	opts = append(opts, server.WithRegistry(r))
 
 	return opts
 }

@@ -15,7 +15,7 @@ type Client interface {
 	Register(ctx context.Context, Req *user.RegisterReq, callOptions ...callopt.Option) (r *user.RegisterResp, err error)
 	Login(ctx context.Context, Req *user.LoginReq, callOptions ...callopt.Option) (r *user.LoginResp, err error)
 	GetUserInfo(ctx context.Context, Req *user.GetUserInfoReq, callOptions ...callopt.Option) (r *user.GetUserInfoResp, err error)
-	Logout(ctx context.Context, Req *common.Empty, callOptions ...callopt.Option) (r *common.Empty, err error)
+	Logout(ctx context.Context, Req *user.LogoutReq, callOptions ...callopt.Option) (r *common.Empty, err error)
 	DeleteUser(ctx context.Context, Req *user.DeleteUserReq, callOptions ...callopt.Option) (r *common.Empty, err error)
 	UpdateUser(ctx context.Context, Req *user.UpdateUserReq, callOptions ...callopt.Option) (r *user.UpdateUserResp, err error)
 }
@@ -64,7 +64,7 @@ func (p *kUserServiceClient) GetUserInfo(ctx context.Context, Req *user.GetUserI
 	return p.kClient.GetUserInfo(ctx, Req)
 }
 
-func (p *kUserServiceClient) Logout(ctx context.Context, Req *common.Empty, callOptions ...callopt.Option) (r *common.Empty, err error) {
+func (p *kUserServiceClient) Logout(ctx context.Context, Req *user.LogoutReq, callOptions ...callopt.Option) (r *common.Empty, err error) {
 	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
 	return p.kClient.Logout(ctx, Req)
 }
