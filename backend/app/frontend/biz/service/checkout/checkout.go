@@ -1,8 +1,8 @@
 package checkout
 
 import (
-	checkout "byte_go/backend/app/front/hertz_gen/frontend/checkout"
-	"byte_go/backend/app/front/infra/rpc"
+	checkout "byte_go/backend/app/frontend/hertz_gen/frontend/checkout"
+	"byte_go/backend/app/frontend/infra/rpc"
 	rpcCheckout "byte_go/backend/rpc_gen/kitex_gen/checkout"
 	rpcPayment "byte_go/backend/rpc_gen/kitex_gen/payment"
 	"context"

@@ -7,7 +7,7 @@
 package product
 
 import (
-	_ "byte_go/backend/app/front/hertz_gen/api"
+	_ "byte_go/backend/app/frontend/hertz_gen/api"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"

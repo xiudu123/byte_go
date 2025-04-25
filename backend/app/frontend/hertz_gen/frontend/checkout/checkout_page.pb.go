@@ -7,8 +7,8 @@
 package checkout
 
 import (
-	_ "byte_go/backend/app/front/hertz_gen/api"
-	payment "byte_go/backend/app/front/hertz_gen/frontend/payment"
+	_ "byte_go/backend/app/frontend/hertz_gen/api"
+	payment "byte_go/backend/app/frontend/hertz_gen/frontend/payment"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"

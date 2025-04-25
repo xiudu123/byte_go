@@ -3,12 +3,12 @@
 package router
 
 import (
-	cart "byte_go/backend/app/front/biz/router/cart"
-	checkout "byte_go/backend/app/front/biz/router/checkout"
-	order "byte_go/backend/app/front/biz/router/order"
-	payment "byte_go/backend/app/front/biz/router/payment"
-	product "byte_go/backend/app/front/biz/router/product"
-	user "byte_go/backend/app/front/biz/router/user"
+	cart "byte_go/backend/app/frontend/biz/router/cart"
+	checkout "byte_go/backend/app/frontend/biz/router/checkout"
+	order "byte_go/backend/app/frontend/biz/router/order"
+	payment "byte_go/backend/app/frontend/biz/router/payment"
+	product "byte_go/backend/app/frontend/biz/router/product"
+	user "byte_go/backend/app/frontend/biz/router/user"
 	"github.com/cloudwego/hertz/pkg/app/server"
 )
 

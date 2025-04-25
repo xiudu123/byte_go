@@ -1,11 +1,11 @@
 package product
 
 import (
-	product2 "byte_go/backend/app/front/biz/service/product"
+	product2 "byte_go/backend/app/frontend/biz/service/product"
 	"context"
 
-	"byte_go/backend/app/front/biz/utils"
-	product "byte_go/backend/app/front/hertz_gen/frontend/product"
+	"byte_go/backend/app/frontend/biz/utils"
+	product "byte_go/backend/app/frontend/hertz_gen/frontend/product"
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/protocol/consts"
 )

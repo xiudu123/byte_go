@@ -3,7 +3,7 @@
 package cart
 
 import (
-	cart "byte_go/backend/app/front/biz/handler/cart"
+	cart "byte_go/backend/app/frontend/biz/handler/cart"
 	"github.com/cloudwego/hertz/pkg/app/server"
 )
 

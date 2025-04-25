@@ -1,0 +1,28 @@
+FROM golang:1.22.5 AS builder
+
+WORKDIR /usr/src/byte_go/backend
+
+#ENV GOPROXY=https://goproxy.cn,https://goproxy.io,https://mirrors.aliyun.com/goproxy/,https://proxy.golang.org,direct
+ENV GOPROXY=https://goproxy.cn,direct
+ENV GOSUMDB=sum.golang.google.cn
+ENV GOPROXY_TIMEOUT=300
+
+COPY ../rpc_gen ./rpc_gen
+COPY ../utils ./utils
+COPY ../app/frontend/go.mod app/frontend/go.sum ./app/frontend/
+RUN cd app/frontend/ && go mod download
+
+COPY ../app/frontend app/frontend
+
+RUN go clean -modcache && \
+    cd app/frontend && CGO_ENABLED=0 GOOS=linux go build -v -o /opt/byte_go/frontend/server
+
+
+FROM busybox
+COPY --from=builder /opt/byte_go/frontend/server /opt/byte_go/frontend/server
+
+COPY ../app/frontend/conf /opt/byte_go/frontend/conf
+
+WORKDIR /opt/byte_go/frontend
+EXPOSE 8080
+CMD ["./server"]

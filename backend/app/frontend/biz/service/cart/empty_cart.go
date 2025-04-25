@@ -1,8 +1,8 @@
 package cart
 
 import (
-	cart "byte_go/backend/app/front/hertz_gen/frontend/cart"
-	"byte_go/backend/app/front/infra/rpc"
+	cart "byte_go/backend/app/frontend/hertz_gen/frontend/cart"
+	"byte_go/backend/app/frontend/infra/rpc"
 	rpcCart "byte_go/backend/rpc_gen/kitex_gen/cart"
 	"context"
 	"github.com/cloudwego/hertz/pkg/app"

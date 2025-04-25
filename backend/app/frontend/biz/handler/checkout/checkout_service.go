@@ -1,11 +1,11 @@
 package checkout
 
 import (
-	checkout2 "byte_go/backend/app/front/biz/service/checkout"
+	checkout2 "byte_go/backend/app/frontend/biz/service/checkout"
 	"context"
 
-	"byte_go/backend/app/front/biz/utils"
-	checkout "byte_go/backend/app/front/hertz_gen/frontend/checkout"
+	"byte_go/backend/app/frontend/biz/utils"
+	checkout "byte_go/backend/app/frontend/hertz_gen/frontend/checkout"
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/protocol/consts"
 )

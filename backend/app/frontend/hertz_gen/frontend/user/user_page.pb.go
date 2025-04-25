@@ -7,8 +7,8 @@
 package user
 
 import (
-	_ "byte_go/backend/app/front/hertz_gen/api"
-	common_hertz "byte_go/backend/app/front/hertz_gen/frontend/common_hertz"
+	_ "byte_go/backend/app/frontend/hertz_gen/api"
+	common_hertz "byte_go/backend/app/frontend/hertz_gen/frontend/common_hertz"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"

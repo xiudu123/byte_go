@@ -1,4 +1,4 @@
-version: '3'
+version: '3.8'
 services:
   consul:
     image: 'hashicorp/consul:latest'
@@ -9,14 +9,23 @@ services:
     ports:
       - "3306:3306"
     environment:
-      - MYSQL_ROOT=root
       - MYSQL_ROOT_PASSWORD=byte_go
     volumes:
       - ./deploy/sql/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-pbyte_go"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
   redis:
     image: 'redis:latest'
     ports:
       - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
   prometheus:
     image: prom/prometheus:latest
     volumes:
@@ -53,3 +62,166 @@ services:
       - ./deploy/config/promtail.yml:/etc/promtail/config.yml
       - ./app/frontend/log:/logs/frontend
     command: -config.file=/etc/promtail/config.yml
+  frontend:
+    build:
+      context: ./
+      dockerfile: ./deploy/Dockerfile-frontend
+    ports:
+      - "8080:8080"
+    environment:
+      - MYSQL_USER=root
+      - MYSQL_PASSWORD=byte_go
+      - MYSQL_HOST=mysql
+      - MYSQL_DATABASE=rule
+      - GO_ENV=dev
+    depends_on:
+      consul:
+        condition: service_started
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    volumes:
+      - ./app/frontend/conf:/opt/byte_go/frontend/conf
+      - ./app/frontend/log:/opt/byte_go/frontend/log
+      - ./app/frontend/casbin/model.pml:/opt/byte_go/frontend/casbin/model.pml
+  auth:
+    build:
+      context: ./
+      dockerfile: ./deploy/Dockerfile-svc
+      args:
+        - SVC=auth
+    environment:
+      - GO_ENV=dev
+    depends_on:
+      consul:
+        condition: service_started
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./app/auth/conf:/opt/byte_go/auth/conf
+      - ./app/auth/log:/opt/byte_go/auth/log
+  cart:
+    build:
+      context: ./
+      dockerfile: ./deploy/Dockerfile-svc
+      args:
+        - SVC=cart
+    environment:
+      - GO_ENV=dev
+      - MYSQL_USER=root
+      - MYSQL_PASSWORD=byte_go
+      - MYSQL_HOST=mysql
+      - MYSQL_DATABASE=cart
+    depends_on:
+      consul:
+        condition: service_started
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./app/cart/conf:/opt/byte_go/cart/conf
+      - ./app/cart/log:/opt/byte_go/cart/log
+  checkout:
+    build:
+      context: ./
+      dockerfile: ./deploy/Dockerfile-svc
+      args:
+        - SVC=checkout
+    environment:
+      - GO_ENV=dev
+    depends_on:
+      consul:
+        condition: service_started
+    volumes:
+      - ./app/checkout/conf:/opt/byte_go/checkout/conf
+      - ./app/checkout/log:/opt/byte_go/checkout/log
+  order:
+    build:
+      context: ./
+      dockerfile: ./deploy/Dockerfile-svc
+      args:
+        - SVC=order
+    environment:
+      - GO_ENV=dev
+      - MYSQL_USER=root
+      - MYSQL_PASSWORD=byte_go
+      - MYSQL_HOST=mysql
+      - MYSQL_DATABASE=order
+    depends_on:
+      consul:
+        condition: service_started
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./app/order/conf:/opt/byte_go/order/conf
+      - ./app/order/log:/opt/byte_go/order/log
+  payment:
+    build:
+      context: ./
+      dockerfile: ./deploy/Dockerfile-svc
+      args:
+        - SVC=payment
+    environment:
+      - GO_ENV=dev
+      - MYSQL_USER=root
+      - MYSQL_PASSWORD=byte_go
+      - MYSQL_HOST=mysql
+      - MYSQL_DATABASE=payment
+    depends_on:
+      consul:
+        condition: service_started
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./app/payment/conf:/opt/byte_go/payment/conf
+      - ./app/payment/log:/opt/byte_go/payment/log
+  product:
+    build:
+      context: ./
+      dockerfile: ./deploy/Dockerfile-svc
+      args:
+        - SVC=product
+    environment:
+      - GO_ENV=dev
+      - MYSQL_USER=root
+      - MYSQL_PASSWORD=byte_go
+      - MYSQL_HOST=mysql
+      - MYSQL_DATABASE=product
+    depends_on:
+      consul:
+        condition: service_started
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./app/product/conf:/opt/byte_go/product/conf
+      - ./app/product/log:/opt/byte_go/product/log
+  user:
+    build:
+      context: ./
+      dockerfile: ./deploy/Dockerfile-svc
+      args:
+        - SVC=user
+    environment:
+      - GO_ENV=dev
+      - MYSQL_USER=root
+      - MYSQL_PASSWORD=byte_go
+      - MYSQL_HOST=mysql
+      - MYSQL_DATABASE=user
+    depends_on:
+      consul:
+        condition: service_started
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./app/user/conf:/opt/byte_go/user/conf
+      - ./app/user/log:/opt/byte_go/user/log

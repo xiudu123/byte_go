@@ -1,8 +1,8 @@
 package middleware
 
 import (
-	"byte_go/backend/app/front/casbin"
-	"byte_go/backend/app/front/infra/rpc"
+	"byte_go/backend/app/frontend/casbin"
+	"byte_go/backend/app/frontend/infra/rpc"
 	rpcAuth "byte_go/backend/rpc_gen/kitex_gen/auth"
 	"context"
 	"github.com/cloudwego/hertz/pkg/app"
@@ -22,6 +22,7 @@ var whitelist = []string{
 	"/user/login",    // 登录
 	"/user/register", // 注册
 	"/user/get/*",    // 获取用户信息
+	"/ping",          // 测试接口
 }
 
 func JwtAuthMiddleware() app.HandlerFunc {
@@ -47,13 +48,14 @@ func JwtAuthMiddleware() app.HandlerFunc {
 
 		ok, err := casbin.CheckPermission(claims.UserId, currentPath, string(ctx.Method()))
 		if err != nil {
-			hlog.Fatalf("user [%d] visit [%s] method [%s] check permission failed: %v", claims.UserId, currentPath, string(ctx.Method()), err.Error())
+			hlog.Errorf("user [%d] visit [%s] method [%s] check permission failed: %v", claims.UserId, currentPath, string(ctx.Method()), err.Error())
 			ctx.AbortWithStatusJSON(401, "请重新登录")
 			return
 		}
 		if !ok {
-			hlog.Fatalf("user [%d] visit [%s] method [%s] no permission", claims.UserId, currentPath, string(ctx.Method()))
+			hlog.Errorf("user [%d] visit [%s] method [%s] no permission", claims.UserId, currentPath, string(ctx.Method()))
 			ctx.AbortWithStatusJSON(401, "无权限")
+			return
 		}
 
 		ctx.Set("jti", claims.Jti)

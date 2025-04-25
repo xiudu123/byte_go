@@ -1,7 +1,7 @@
 package rpc
 
 import (
-	"byte_go/backend/app/front/conf"
+	"byte_go/backend/app/frontend/conf"
 	"byte_go/backend/rpc_gen/kitex_gen/auth/authservice"
 	"byte_go/backend/rpc_gen/kitex_gen/cart/cartservice"
 	"byte_go/backend/rpc_gen/kitex_gen/checkout/checkoutservice"

@@ -1,9 +1,9 @@
 package utils
 
 import (
-	hertzCart "byte_go/backend/app/front/hertz_gen/frontend/cart"
-	hertzOrder "byte_go/backend/app/front/hertz_gen/frontend/order"
-	hertzProduct "byte_go/backend/app/front/hertz_gen/frontend/product"
+	hertzCart "byte_go/backend/app/frontend/hertz_gen/frontend/cart"
+	hertzOrder "byte_go/backend/app/frontend/hertz_gen/frontend/order"
+	hertzProduct "byte_go/backend/app/frontend/hertz_gen/frontend/product"
 	rpcCart "byte_go/backend/rpc_gen/kitex_gen/cart"
 	rpcOrder "byte_go/backend/rpc_gen/kitex_gen/order"
 	rpcProduct "byte_go/backend/rpc_gen/kitex_gen/product"
@@ -86,6 +86,6 @@ func OrderListGen2Hertz(orderGen []*rpcOrder.Order) (orderHertz []*hertzOrder.Or
 			OrderItems: orderItems,
 		}
 	}
-	
+
 	return orderHertz
 }

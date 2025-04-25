@@ -1,11 +1,11 @@
 package cart
 
 import (
-	cart2 "byte_go/backend/app/front/biz/service/cart"
+	cart2 "byte_go/backend/app/frontend/biz/service/cart"
 	"context"
 
-	"byte_go/backend/app/front/biz/utils"
-	cart "byte_go/backend/app/front/hertz_gen/frontend/cart"
+	"byte_go/backend/app/frontend/biz/utils"
+	cart "byte_go/backend/app/frontend/hertz_gen/frontend/cart"
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/protocol/consts"
 )

@@ -3,18 +3,18 @@
 package main
 
 import (
-	"byte_go/backend/app/front/biz/dal"
-	"byte_go/backend/app/front/casbin"
-	"byte_go/backend/app/front/infra/rpc"
-	"byte_go/backend/app/front/middleware"
+	"byte_go/backend/app/frontend/biz/dal"
+	"byte_go/backend/app/frontend/casbin"
+	"byte_go/backend/app/frontend/infra/rpc"
+	"byte_go/backend/app/frontend/middleware"
 	"byte_go/backend/utils/mtl"
 	"context"
 	prometheus "github.com/hertz-contrib/monitor-prometheus"
 	"github.com/joho/godotenv"
 	"time"
 
-	"byte_go/backend/app/front/biz/router"
-	"byte_go/backend/app/front/conf"
+	"byte_go/backend/app/frontend/biz/router"
+	"byte_go/backend/app/frontend/conf"
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/app/middlewares/server/recovery"
 	"github.com/cloudwego/hertz/pkg/app/server"
@@ -61,7 +61,17 @@ func main() {
 		)),
 		tracer,
 	)
-
+	h.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"https://foo.com"},
+		AllowMethods:     []string{"PUT", "PATCH", "POST", "GET"},
+		AllowHeaders:     []string{"Origin"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+		AllowOriginFunc: func(origin string) bool {
+			return origin == "https://github.com"
+		},
+		MaxAge: 12 * time.Hour,
+	}))
 	h.Use(hertztracing.ServerMiddleware(cfg))
 	registerMiddleware(h)
 

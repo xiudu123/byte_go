@@ -1,11 +1,11 @@
 package payment
 
 import (
-	payment2 "byte_go/backend/app/front/biz/service/payment"
+	payment2 "byte_go/backend/app/frontend/biz/service/payment"
 	"context"
 
-	"byte_go/backend/app/front/biz/utils"
-	payment "byte_go/backend/app/front/hertz_gen/frontend/payment"
+	"byte_go/backend/app/frontend/biz/utils"
+	payment "byte_go/backend/app/frontend/hertz_gen/frontend/payment"
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/protocol/consts"
 )

@@ -1,9 +1,9 @@
 package user
 
 import (
-	"byte_go/backend/app/front/hertz_gen/frontend/common_hertz"
-	user "byte_go/backend/app/front/hertz_gen/frontend/user"
-	"byte_go/backend/app/front/infra/rpc"
+	"byte_go/backend/app/frontend/hertz_gen/frontend/common_hertz"
+	user "byte_go/backend/app/frontend/hertz_gen/frontend/user"
+	"byte_go/backend/app/frontend/infra/rpc"
 	rpcUser "byte_go/backend/rpc_gen/kitex_gen/user"
 	"context"
 	"github.com/cloudwego/hertz/pkg/app"

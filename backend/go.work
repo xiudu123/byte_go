@@ -1,0 +1,16 @@
+go 1.22.5
+
+use (
+	./app/auth
+	./app/cart
+	./app/checkout
+	./app/frontend
+	./app/order
+	./app/payment
+	./app/product
+	./app/user
+	./rpc_gen
+	./utils
+)
+
+replace github.com/apache/thrift => github.com/apache/thrift v0.13.0

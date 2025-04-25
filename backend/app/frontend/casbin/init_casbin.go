@@ -1,11 +1,13 @@
 package casbin
 
 import (
-	"byte_go/backend/app/front/biz/dal/mysql"
-	"byte_go/backend/app/front/conf"
+	"byte_go/backend/app/frontend/biz/dal/mysql"
+	"byte_go/backend/app/frontend/conf"
 	"github.com/casbin/casbin/v2"
 	"github.com/casbin/casbin/v2/model"
 	gormadapter "github.com/casbin/gorm-adapter/v3"
+	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 )
@@ -22,7 +24,7 @@ const (
 
 func InitCasbin() {
 	tmp, _ := gormadapter.NewAdapterByDB(mysql.DB)
-	m, err := model.NewModelFromFile("./casbin/model.pml")
+	m, err := model.NewModelFromFile(filepath.Join(os.Getenv("PWD"), "casbin/model.pml"))
 	if err != nil {
 		panic(err)
 	}

@@ -1,0 +1,31 @@
+FROM golang:1.22.5 AS builder
+
+WORKDIR /usr/src/byte_go/backend
+
+ARG SVC
+
+#ENV GOPROXY=https://goproxy.cn,https://goproxy.io,https://mirrors.aliyun.com/goproxy/,https://proxy.golang.org,direct
+ENV GOPROXY=https://goproxy.cn,direct
+ENV GOSUMDB=sum.golang.google.cn
+ENV GOPROXY_TIMEOUT=300
+
+COPY ../rpc_gen ./rpc_gen
+COPY ../utils ./utils
+COPY ../kitex_err ./kitex_err
+COPY ../app/${SVC}/go.mod app/${SVC}/go.sum ./app/${SVC}/
+RUN cd app/${SVC}/ && go mod download
+COPY ../app/${SVC} app/${SVC}
+
+RUN go clean -modcache && \
+    cd app/${SVC} && CGO_ENABLED=0 GOOS=linux go build -v -o /opt/byte_go/${SVC}/server
+
+
+FROM busybox
+
+ARG SVC
+
+COPY --from=builder /opt/byte_go/${SVC}/server /opt/byte_go/${SVC}/server
+COPY ../app/${SVC}/conf /opt/byte_go/${SVC}/conf
+
+WORKDIR /opt/byte_go/${SVC}
+CMD ["./server"]

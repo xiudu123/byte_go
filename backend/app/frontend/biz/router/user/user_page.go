@@ -3,7 +3,7 @@
 package user
 
 import (
-	user "byte_go/backend/app/front/biz/handler/user"
+	user "byte_go/backend/app/frontend/biz/handler/user"
 	"github.com/cloudwego/hertz/pkg/app/server"
 )
 

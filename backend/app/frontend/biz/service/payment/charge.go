@@ -1,12 +1,12 @@
 package payment
 
 import (
-	"byte_go/backend/app/front/infra/rpc"
+	"byte_go/backend/app/frontend/infra/rpc"
 	rpcPayment "byte_go/backend/rpc_gen/kitex_gen/payment"
 	"context"
 	"github.com/cloudwego/hertz/pkg/common/hlog"
 
-	payment "byte_go/backend/app/front/hertz_gen/frontend/payment"
+	payment "byte_go/backend/app/frontend/hertz_gen/frontend/payment"
 	"github.com/cloudwego/hertz/pkg/app"
 )
 

@@ -1,9 +1,9 @@
 package user
 
 import (
-	user2 "byte_go/backend/app/front/biz/service/user"
-	"byte_go/backend/app/front/biz/utils"
-	user "byte_go/backend/app/front/hertz_gen/frontend/user"
+	user2 "byte_go/backend/app/frontend/biz/service/user"
+	"byte_go/backend/app/frontend/biz/utils"
+	user "byte_go/backend/app/frontend/hertz_gen/frontend/user"
 	"context"
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/protocol/consts"

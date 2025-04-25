@@ -1,11 +1,7 @@
 package utils
 
 import (
-	"byte_go/backend/constants"
-	"context"
-	"encoding/json"
 	"fmt"
-	"github.com/bytedance/gopkg/cloud/metainfo"
 	"github.com/golang-jwt/jwt/v5"
 	"time"
 )
@@ -54,10 +50,4 @@ func ParseToken(tokenString string) (*Claims, error) {
 		return claims, nil
 	}
 	return nil, err
-}
-
-func GetClaims(ctx context.Context) (claims *Claims, err error) {
-	claimsJson, _ := metainfo.GetValue(ctx, constants.JwtClaimsKey)
-	err = json.Unmarshal([]byte(claimsJson), &claims)
-	return
 }

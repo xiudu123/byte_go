@@ -3,7 +3,7 @@
 package payment
 
 import (
-	payment "byte_go/backend/app/front/biz/handler/payment"
+	payment "byte_go/backend/app/frontend/biz/handler/payment"
 	"github.com/cloudwego/hertz/pkg/app/server"
 )
 

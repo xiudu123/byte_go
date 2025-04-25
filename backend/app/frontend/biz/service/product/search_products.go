@@ -1,13 +1,13 @@
 package product
 
 import (
-	"byte_go/backend/app/front/biz/utils"
-	"byte_go/backend/app/front/infra/rpc"
+	"byte_go/backend/app/frontend/biz/utils"
+	"byte_go/backend/app/frontend/infra/rpc"
 	rpcProduct "byte_go/backend/rpc_gen/kitex_gen/product"
 	"context"
 	"github.com/cloudwego/hertz/pkg/common/hlog"
 
-	product "byte_go/backend/app/front/hertz_gen/frontend/product"
+	product "byte_go/backend/app/frontend/hertz_gen/frontend/product"
 	"github.com/cloudwego/hertz/pkg/app"
 )
 

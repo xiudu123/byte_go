@@ -1,7 +1,7 @@
 package mysql
 
 import (
-	"byte_go/backend/app/front/conf"
+	"byte_go/backend/app/frontend/conf"
 	"fmt"
 	gormadapter "github.com/casbin/gorm-adapter/v3"
 	"gorm.io/driver/mysql"

@@ -1,8 +1,8 @@
 package user
 
 import (
-	user "byte_go/backend/app/front/hertz_gen/frontend/user"
-	"byte_go/backend/app/front/infra/rpc"
+	user "byte_go/backend/app/frontend/hertz_gen/frontend/user"
+	"byte_go/backend/app/frontend/infra/rpc"
 	rpcUser "byte_go/backend/rpc_gen/kitex_gen/user"
 	"context"
 	"errors"

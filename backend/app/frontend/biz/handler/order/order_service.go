@@ -1,11 +1,11 @@
 package order
 
 import (
-	order2 "byte_go/backend/app/front/biz/service/order"
+	order2 "byte_go/backend/app/frontend/biz/service/order"
 	"context"
 
-	"byte_go/backend/app/front/biz/utils"
-	order "byte_go/backend/app/front/hertz_gen/frontend/order"
+	"byte_go/backend/app/frontend/biz/utils"
+	order "byte_go/backend/app/frontend/hertz_gen/frontend/order"
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/protocol/consts"
 )

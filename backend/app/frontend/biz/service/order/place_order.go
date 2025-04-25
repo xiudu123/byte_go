@@ -1,13 +1,13 @@
 package order
 
 import (
-	"byte_go/backend/app/front/infra/rpc"
+	"byte_go/backend/app/frontend/infra/rpc"
 	rpcCart "byte_go/backend/rpc_gen/kitex_gen/cart"
 	rpcOrder "byte_go/backend/rpc_gen/kitex_gen/order"
 	"context"
 	"github.com/cloudwego/hertz/pkg/common/hlog"
 
-	order "byte_go/backend/app/front/hertz_gen/frontend/order"
+	order "byte_go/backend/app/frontend/hertz_gen/frontend/order"
 	"github.com/cloudwego/hertz/pkg/app"
 )
 
