@@ -2,7 +2,8 @@ package service
 
 import (
 	"byte_go/backend/app/product/biz/dal/mysql"
-	"byte_go/backend/app/product/biz/model"
+	"byte_go/backend/app/product/biz/dal/redis"
+	"byte_go/backend/app/product/biz/dal/repository"
 	product "byte_go/backend/rpc_gen/kitex_gen/product"
 	"byte_go/kitex_err"
 	"context"
@@ -25,13 +26,15 @@ func (s *GetProductService) Run(req *product.GetProductReq) (resp *product.GetPr
 		return nil, kitex_err.ProductNotExist
 	}
 
+	// 定义查询对象
+	productQuery := repository.NewProductRepository(s.ctx, mysql.DB, redis.RedisClient)
+
 	// 获取商品
-	productQuery := model.NewProductQuery(s.ctx, mysql.DB)
 	p, err := productQuery.GetProductById(uint(req.ProductId))
-	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return nil, kitex_err.ProductNotExist
-	}
 	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, kitex_err.ProductNotExist
+		}
 		klog.Errorf("get product by id '%d' failed: %v", req.ProductId, err.Error())
 		return nil, kitex_err.MysqlError
 	}

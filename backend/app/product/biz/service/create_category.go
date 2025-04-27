@@ -2,6 +2,7 @@ package service
 
 import (
 	"byte_go/backend/app/product/biz/dal/mysql"
+	"byte_go/backend/app/product/biz/dal/repository"
 	"byte_go/backend/app/product/biz/model"
 	product "byte_go/backend/rpc_gen/kitex_gen/product"
 	"byte_go/kitex_err"
@@ -24,10 +25,10 @@ func (s *CreateCategoryService) Run(req *product.CreateCategoryReq) (resp *produ
 		return nil, kitex_err.RequestParamError
 	}
 
-	categoryQuery := model.NewCategoryQuery(s.ctx, mysql.DB)
+	categoryQuery := repository.NewCategoryRepository(s.ctx, mysql.DB)
 
 	// 判断分类是否存在
-	categoryExist, err := categoryQuery.ExistCateGoryByName(req.Name)
+	categoryExist, err := categoryQuery.ExistCategoryByName(req.Name)
 	if err != nil {
 		klog.Errorf("check category [%s] exist failed: %v", req.Name, err.Error())
 		return nil, kitex_err.MysqlError
@@ -40,7 +41,7 @@ func (s *CreateCategoryService) Run(req *product.CreateCategoryReq) (resp *produ
 	category := model.Category{
 		Name: req.Name,
 	}
-	err = categoryQuery.CreateCategory(category)
+	err = categoryQuery.CreateCategory(&category)
 	if err != nil {
 		klog.Errorf("create category [%s] failed: %v", req.Name, err.Error())
 		return nil, kitex_err.MysqlError

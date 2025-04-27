@@ -2,11 +2,15 @@ package service
 
 import (
 	"byte_go/backend/app/product/biz/dal/mysql"
+	"byte_go/backend/app/product/biz/dal/redis"
+	"byte_go/backend/app/product/biz/dal/repository"
 	"byte_go/backend/app/product/biz/model"
 	product "byte_go/backend/rpc_gen/kitex_gen/product"
 	"byte_go/kitex_err"
 	"context"
+	"errors"
 	"github.com/cloudwego/kitex/pkg/klog"
+	"gorm.io/gorm"
 )
 
 type UpdateProductService struct {
@@ -24,20 +28,20 @@ func (s *UpdateProductService) Run(req *product.UpdateProductReq) (resp *product
 		return nil, kitex_err.RequestParamError
 	}
 
-	productQuery := model.NewProductQuery(s.ctx, mysql.DB)
-	categoryQuery := model.NewCategoryQuery(s.ctx, mysql.DB)
+	productQuery := repository.NewProductRepository(s.ctx, mysql.DB, redis.RedisClient)
+	categoryQuery := repository.NewCategoryRepository(s.ctx, mysql.DB)
 	// 检查商品是否存在
-	productOld, err := productQuery.ExistProductById(uint(req.ProductId))
+	productOld, err := productQuery.GetProductById(uint(req.ProductId))
 	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, kitex_err.ProductNotExist
+		}
 		klog.Errorf("check product [%d] exist failed: %v", req.ProductId, err.Error())
 		return nil, kitex_err.MysqlError
 	}
-	if productOld == nil {
-		return nil, kitex_err.ProductNotExist
-	}
 
 	// 清空商品分类
-	if err = productQuery.ClearCategory(*productOld); err != nil {
+	if err = productQuery.ClearCategory(productOld); err != nil {
 		klog.Errorf("clear product [%d] category failed: %v", req.ProductId, err.Error())
 		return nil, kitex_err.MysqlError
 	}
@@ -53,7 +57,7 @@ func (s *UpdateProductService) Run(req *product.UpdateProductReq) (resp *product
 	}
 
 	// 更新商品
-	productReq := model.Product{
+	productReq := &model.Product{
 		Name:        req.Name,
 		Description: req.Description,
 		Picture:     req.Picture,

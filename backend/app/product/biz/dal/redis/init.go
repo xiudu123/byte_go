@@ -3,8 +3,8 @@ package redis
 import (
 	"context"
 
-	"github.com/redis/go-redis/v9"
 	"byte_go/backend/app/product/conf"
+	"github.com/redis/go-redis/v9"
 )
 
 var (

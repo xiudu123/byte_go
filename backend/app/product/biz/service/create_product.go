@@ -2,6 +2,8 @@ package service
 
 import (
 	"byte_go/backend/app/product/biz/dal/mysql"
+	"byte_go/backend/app/product/biz/dal/redis"
+	"byte_go/backend/app/product/biz/dal/repository"
 	"byte_go/backend/app/product/biz/model"
 	product "byte_go/backend/rpc_gen/kitex_gen/product"
 	"byte_go/kitex_err"
@@ -24,9 +26,11 @@ func (s *CreateProductService) Run(req *product.CreateProductReq) (resp *product
 		return nil, kitex_err.RequestParamError
 	}
 
-	productQuery := model.NewProductQuery(s.ctx, mysql.DB)
+	// 定义查询对象
+	productQuery := repository.NewProductRepository(s.ctx, mysql.DB, redis.RedisClient)
+	categoryQuery := repository.NewCategoryRepository(s.ctx, mysql.DB)
+
 	// 处理商品分类
-	categoryQuery := model.NewCategoryQuery(s.ctx, mysql.DB)
 	categories, err := categoryQuery.GetCategoriesByNames(req.Categories)
 	if err != nil {
 		klog.Errorf("get categories failed: %v", err.Error())
@@ -35,8 +39,9 @@ func (s *CreateProductService) Run(req *product.CreateProductReq) (resp *product
 	if len(categories) != len(req.Categories) {
 		return nil, kitex_err.CategoryNotExist
 	}
+
 	// 插入商品
-	productReq := model.Product{
+	productReq := &model.Product{
 		Name:        req.Name,
 		Description: req.Description,
 		Picture:     req.Picture,
