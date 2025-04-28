@@ -1,8 +1,7 @@
 package service
 
 import (
-	"byte_go/backend/app/user/biz/dal/mysql"
-	"byte_go/backend/app/user/biz/model"
+	"byte_go/backend/app/user/biz/dal/repository"
 	"byte_go/backend/app/user/infra/rpc"
 	rpcAuth "byte_go/backend/rpc_gen/kitex_gen/auth"
 	common "byte_go/backend/rpc_gen/kitex_gen/common"
@@ -28,7 +27,8 @@ func (s *DeleteUserService) Run(req *user.DeleteUserReq) (resp *common.Empty, er
 
 	// 删除用户
 	userId := req.UserId
-	if err = model.DeleteById(mysql.DB, uint(userId)); err != nil {
+	userRepository := repository.NewUserRepository(s.ctx)
+	if err = userRepository.DeleteById(uint(userId)); err != nil {
 		klog.Errorf("user delete failed, user_id:%+v,  err: %v", userId, err.Error())
 		return nil, kitex_err.MysqlError
 	}
@@ -39,6 +39,6 @@ func (s *DeleteUserService) Run(req *user.DeleteUserReq) (resp *common.Empty, er
 		klog.Errorf("user delete token list failed, user_id:%+v,  err: %v", userId, err.Error())
 		return nil, err
 	}
-	
+
 	return &common.Empty{}, nil
 }

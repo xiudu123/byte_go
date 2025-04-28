@@ -1,8 +1,7 @@
 package service
 
 import (
-	"byte_go/backend/app/user/biz/dal/mysql"
-	"byte_go/backend/app/user/biz/model"
+	"byte_go/backend/app/user/biz/dal/repository"
 	user "byte_go/backend/rpc_gen/kitex_gen/user"
 	"byte_go/kitex_err"
 	"context"
@@ -26,8 +25,10 @@ func (s *UpdateUserService) Run(req *user.UpdateUserReq) (resp *user.UpdateUserR
 		return nil, kitex_err.RequestParamError
 	}
 
+	userRepository := repository.NewUserRepository(s.ctx)
+
 	// 检查用户是否存在
-	userInfo, err := model.GetById(mysql.DB, uint(req.UserId))
+	userInfo, err := userRepository.GetById(uint(req.UserId))
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, kitex_err.UserNotExist
 	}
@@ -48,7 +49,7 @@ func (s *UpdateUserService) Run(req *user.UpdateUserReq) (resp *user.UpdateUserR
 	}
 
 	// 更新
-	if err = model.UpdateById(mysql.DB, uint(req.UserId), updateInfo); err != nil {
+	if err = userRepository.UpdateById(uint(req.UserId), updateInfo); err != nil {
 		klog.Errorf("user update failed, param:%+v,  err: %v", req.UserId, err.Error())
 		return nil, kitex_err.MysqlError
 	}

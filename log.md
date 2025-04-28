@@ -1,6 +1,4 @@
-4.27：
-
-为product服务添加redis缓存
+添加redis缓存
 
 - 将redis操作和mysql操作分离实现，实现操作解耦
 

@@ -1,12 +1,13 @@
 package service
 
 import (
-	"byte_go/backend/app/user/biz/dal/mysql"
+	"byte_go/backend/app/user/biz/dal/repository"
 	"byte_go/backend/app/user/biz/model"
 	user "byte_go/backend/rpc_gen/kitex_gen/user"
 	"byte_go/kitex_err"
 	"context"
 	"errors"
+	"fmt"
 	"github.com/cloudwego/kitex/pkg/klog"
 	"gorm.io/gorm"
 )
@@ -20,19 +21,21 @@ func NewGetUserInfoService(ctx context.Context) *GetUserInfoService {
 
 // Run create note info
 func (s *GetUserInfoService) Run(req *user.GetUserInfoReq) (resp *user.GetUserInfoResp, err error) {
-
 	// 参数校验
 	if req == nil || req.Identifier == nil {
 		return nil, kitex_err.RequestParamError
 	}
 
+	userRepository := repository.NewUserRepository(s.ctx)
+
 	// 根据 id 或者 email 获取用户信息
-	var userInfo model.User
+	var userInfo *model.User
+	fmt.Println(req.Identifier)
 	switch v := req.Identifier.(type) {
 	case *user.GetUserInfoReq_UserId:
-		userInfo, err = model.GetById(mysql.DB, uint(v.UserId))
+		userInfo, err = userRepository.GetById(uint(v.UserId))
 	case *user.GetUserInfoReq_Email:
-		userInfo, err = model.GetByEmail(mysql.DB, v.Email)
+		userInfo, err = userRepository.GetByEmail(v.Email)
 	default:
 		return nil, kitex_err.RequestParamError
 	}

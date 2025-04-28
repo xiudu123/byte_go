@@ -1,7 +1,7 @@
 package service
 
 import (
-	"byte_go/backend/app/user/biz/dal/mysql"
+	"byte_go/backend/app/user/biz/dal/repository"
 	"byte_go/backend/app/user/biz/model"
 	"byte_go/backend/app/user/infra/rpc"
 	"byte_go/backend/rpc_gen/kitex_gen/auth"
@@ -51,7 +51,8 @@ func (s *RegisterService) Run(req *user.RegisterReq) (resp *user.RegisterResp, e
 		Username:     req.Username,
 		Avatar:       DefaultAvatar,
 	}
-	err = model.Create(mysql.DB, &newUser)
+	userRepository := repository.NewUserRepository(s.ctx)
+	err = userRepository.Create(&newUser)
 	if err == kitex_err.EmailExistError {
 		return nil, kitex_err.EmailExistError
 	}

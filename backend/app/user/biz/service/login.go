@@ -1,8 +1,7 @@
 package service
 
 import (
-	"byte_go/backend/app/user/biz/dal/mysql"
-	"byte_go/backend/app/user/biz/model"
+	"byte_go/backend/app/user/biz/dal/repository"
 	"byte_go/backend/app/user/infra/rpc"
 	"byte_go/backend/rpc_gen/kitex_gen/auth"
 	user "byte_go/backend/rpc_gen/kitex_gen/user"
@@ -27,8 +26,10 @@ func (s *LoginService) Run(req *user.LoginReq) (resp *user.LoginResp, err error)
 		return nil, kitex_err.RequestParamError
 	}
 
+	userRepository := repository.NewUserRepository(s.ctx)
+
 	// 从数据库中获取用户信息
-	userInfo, err := model.GetByEmail(mysql.DB, req.Email)
+	userInfo, err := userRepository.GetByEmail(req.Email)
 	if err != nil {
 		klog.Errorf("login get user by email of %s, err: %v", req.Email, err.Error())
 		return nil, kitex_err.ValidateLoginError
