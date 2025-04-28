@@ -3,7 +3,7 @@ package dao
 import (
 	"byte_go/backend/app/product/biz/model"
 	"context"
-	"github.com/cloudwego/kitex/tool/internal_pkg/log"
+	"github.com/cloudwego/kitex/pkg/klog"
 	"gorm.io/gorm"
 )
 
@@ -27,7 +27,7 @@ func NewCategoryDAO(db *gorm.DB) *CategoryDAO {
 // CreateCategory 创建分类
 func (dao *CategoryDAO) CreateCategory(ctx context.Context, category *model.Category) (err error) {
 	if err := dao.db.WithContext(ctx).Create(category).Error; err != nil {
-		log.Errorf("mysql: create category failed: %v", err.Error())
+		klog.Errorf("mysql: create category failed: %v", err.Error())
 		return err
 	}
 	return nil
@@ -36,7 +36,7 @@ func (dao *CategoryDAO) CreateCategory(ctx context.Context, category *model.Cate
 // GetCategoriesByNames 获取分类
 func (dao *CategoryDAO) GetCategoriesByNames(ctx context.Context, categoryNames []string) (categories []model.Category, err error) {
 	if err := dao.db.WithContext(ctx).Where("name IN ?", categoryNames).Find(&categories).Error; err != nil {
-		log.Errorf("mysql: get categories by names failed: %v", err.Error())
+		klog.Errorf("mysql: get categories by names failed: %v", err.Error())
 		return nil, err
 	}
 	return categories, nil
@@ -46,7 +46,7 @@ func (dao *CategoryDAO) GetCategoriesByNames(ctx context.Context, categoryNames 
 func (dao *CategoryDAO) ExistCategoryByName(ctx context.Context, categoryName string) (bool, error) {
 	var count int64
 	if err := dao.db.WithContext(ctx).Model(&model.Category{}).Where("name =?", categoryName).Count(&count).Error; err != nil {
-		log.Errorf("mysql: check category [%s] exist failed: %v", categoryName, err.Error())
+		klog.Errorf("mysql: check category [%s] exist failed: %v", categoryName, err.Error())
 		return false, err
 	}
 	return count > 0, nil

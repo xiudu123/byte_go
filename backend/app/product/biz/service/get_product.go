@@ -1,8 +1,6 @@
 package service
 
 import (
-	"byte_go/backend/app/product/biz/dal/mysql"
-	"byte_go/backend/app/product/biz/dal/redis"
 	"byte_go/backend/app/product/biz/dal/repository"
 	product "byte_go/backend/rpc_gen/kitex_gen/product"
 	"byte_go/kitex_err"
@@ -27,7 +25,7 @@ func (s *GetProductService) Run(req *product.GetProductReq) (resp *product.GetPr
 	}
 
 	// 定义查询对象
-	productQuery := repository.NewProductRepository(s.ctx, mysql.DB, redis.RedisClient)
+	productQuery := repository.NewProductRepository(s.ctx)
 
 	// 获取商品
 	p, err := productQuery.GetProductById(uint(req.ProductId))

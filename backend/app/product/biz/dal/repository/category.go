@@ -1,10 +1,10 @@
 package repository
 
 import (
+	"byte_go/backend/app/product/biz/dal/mysql"
 	"byte_go/backend/app/product/biz/dal/mysql/dao"
 	"byte_go/backend/app/product/biz/model"
 	"context"
-	"gorm.io/gorm"
 )
 
 /**
@@ -19,10 +19,10 @@ type CategoryRepository struct {
 	dao *dao.CategoryDAO
 }
 
-func NewCategoryRepository(ctx context.Context, db *gorm.DB) *CategoryRepository {
+func NewCategoryRepository(ctx context.Context) *CategoryRepository {
 	return &CategoryRepository{
 		ctx: ctx,
-		dao: dao.NewCategoryDAO(db),
+		dao: dao.NewCategoryDAO(mysql.DB),
 	}
 }
 

@@ -4,7 +4,7 @@ import (
 	"byte_go/backend/app/product/biz/model"
 	"context"
 	"errors"
-	"github.com/cloudwego/kitex/tool/internal_pkg/log"
+	"github.com/cloudwego/kitex/pkg/klog"
 	"gorm.io/gorm"
 )
 
@@ -39,10 +39,10 @@ func (dao *ProductDAO) GetByID(ctx context.Context, productId uint) (*model.Prod
 
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			log.Infof("mysql: product by id [%d] not found", productId)
-			return &model.Product{}, ErrRecordNotFound
+			klog.Infof("mysql: product by id [%d] not found", productId)
+			return nil, ErrRecordNotFound
 		}
-		log.Errorf("mysql: product by id [%d] failed: %v", productId, err.Error())
+		klog.Errorf("mysql: product by id [%d] failed: %v", productId, err.Error())
 		return nil, err
 	}
 
@@ -60,7 +60,7 @@ func (dao *ProductDAO) ListByIDs(ctx context.Context, productIds []uint) ([]*mod
 		Find(&products).Error
 
 	if err != nil {
-		log.Errorf("mysql: product by ids [%v] failed: %v", productIds, err.Error())
+		klog.Errorf("mysql: product by ids [%v] failed: %v", productIds, err.Error())
 		return nil, err
 	}
 
@@ -70,7 +70,7 @@ func (dao *ProductDAO) ListByIDs(ctx context.Context, productIds []uint) ([]*mod
 // Create 创建商品
 func (dao *ProductDAO) Create(ctx context.Context, product *model.Product) error {
 	if err := dao.db.WithContext(ctx).Create(&product).Error; err != nil {
-		log.Errorf("mysql: create product failed: %v", err.Error())
+		klog.Errorf("mysql: create product failed: %v", err.Error())
 		return err
 	}
 	return nil
@@ -81,12 +81,12 @@ func (dao *ProductDAO) Update(ctx context.Context, product *model.Product) error
 	result := dao.db.WithContext(ctx).Model(&product).Updates(&product)
 
 	if result.Error != nil {
-		log.Errorf("mysql: update product failed: %v", result.Error.Error())
+		klog.Errorf("mysql: update product failed: %v", result.Error.Error())
 		return result.Error
 	}
 
 	if result.RowsAffected == 0 {
-		log.Errorf("mysql: update product failed: product by id [%d] not exist", product.ID)
+		klog.Errorf("mysql: update product failed: product by id [%d] not exist", product.ID)
 		return ErrRecordNotFound
 	}
 
@@ -98,12 +98,12 @@ func (dao *ProductDAO) Delete(ctx context.Context, productId uint) error {
 	result := dao.db.WithContext(ctx).Delete(&model.Product{}, productId)
 
 	if result.Error != nil {
-		log.Errorf("mysql: delete product failed: %v", result.Error.Error())
+		klog.Errorf("mysql: delete product failed: %v", result.Error.Error())
 		return result.Error
 	}
 
 	if result.RowsAffected == 0 {
-		log.Errorf("mysql: delete product failed: product by id [%d] not exist", productId)
+		klog.Errorf("mysql: delete product failed: product by id [%d] not exist", productId)
 		return ErrRecordNotFound
 	}
 
@@ -120,7 +120,7 @@ func (dao *ProductDAO) ClearCategories(ctx context.Context, productId uint) erro
 	}
 
 	if err := dao.db.WithContext(ctx).Model(&product).Association("Categories").Clear(); err != nil {
-		log.Errorf("mysql: clear product categories failed: %v", err.Error())
+		klog.Errorf("mysql: clear product categories failed: %v", err.Error())
 		return err
 	}
 	return nil
@@ -144,7 +144,7 @@ func (dao *ProductDAO) ListByCategory(ctx context.Context, categoryName string, 
 
 	// 计算总数
 	if err := query.Count(&count).Error; err != nil {
-		log.Errorf("mysql: list product by category failed: %v", err.Error())
+		klog.Errorf("mysql: list product by category failed: %v", err.Error())
 		return nil, 0, err
 	}
 
@@ -156,7 +156,7 @@ func (dao *ProductDAO) ListByCategory(ctx context.Context, categoryName string, 
 
 	// 分页查询
 	if err := query.Offset(offset).Limit(pageSize).Find(&products).Error; err != nil {
-		log.Errorf("mysql: list product by category failed: %v", err.Error())
+		klog.Errorf("mysql: list product by category failed: %v", err.Error())
 		return nil, 0, err
 	}
 	return products, count, nil
@@ -171,7 +171,7 @@ func (dao *ProductDAO) Search(ctx context.Context, query string) ([]*model.Produ
 		Where("name LIKE ?", searchPattern).
 		Or("description LIKE ?", searchPattern).
 		Find(&products).Error; err != nil {
-		log.Errorf("mysql: search product failed: %v", err.Error())
+		klog.Errorf("mysql: search product failed: %v", err.Error())
 		return nil, err
 	}
 	return products, nil

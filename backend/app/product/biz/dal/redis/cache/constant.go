@@ -15,8 +15,6 @@ import (
 const (
 	ProductCacheKeyPrefix = "product:"
 	ProductCacheExpire    = 30 * time.Minute
-	CategoryCacheKey      = "category"
-	CategoryCacheExpire   = 30 * time.Minute
 	NotFoundMarker        = "NOT_FOUND"
 	NotFoundTTL           = 5 * time.Minute
 )

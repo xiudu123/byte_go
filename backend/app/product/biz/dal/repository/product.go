@@ -1,14 +1,14 @@
 package repository
 
 import (
+	"byte_go/backend/app/product/biz/dal/mysql"
 	"byte_go/backend/app/product/biz/dal/mysql/dao"
+	"byte_go/backend/app/product/biz/dal/redis"
 	"byte_go/backend/app/product/biz/dal/redis/cache"
 	"byte_go/backend/app/product/biz/model"
 	"context"
 	"errors"
-	"github.com/redis/go-redis/v9"
 	"golang.org/x/sync/singleflight"
-	"gorm.io/gorm"
 	"time"
 )
 
@@ -30,12 +30,12 @@ type ProductRepository struct {
 // ctx: 上下文
 // db: GORM 数据库连接
 // redisClient: Redis 客户端
-func NewProductRepository(ctx context.Context, db *gorm.DB, redisClient *redis.Client) *ProductRepository {
+func NewProductRepository(ctx context.Context) *ProductRepository {
 	return &ProductRepository{
 		ctx:          ctx,
 		productGroup: &singleflight.Group{},
-		cache:        cache.NewProductCache(redisClient), // 初始化缓存实例
-		dao:          dao.NewProductDAO(db),              // 初始化数据库操作实例
+		cache:        cache.NewProductCache(redis.RedisClient), // 初始化缓存实例
+		dao:          dao.NewProductDAO(mysql.DB),              // 初始化数据库操作实例
 	}
 }
 

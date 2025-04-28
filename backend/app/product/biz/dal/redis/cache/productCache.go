@@ -5,7 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/cloudwego/kitex/tool/internal_pkg/log"
+	"github.com/cloudwego/kitex/pkg/klog"
 	"github.com/redis/go-redis/v9"
 	"time"
 )
@@ -59,17 +59,17 @@ func (cache *ProductCache) Get(ctx context.Context, productId uint) (*model.Prod
 		if err == redis.Nil {
 			return nil, ErrCacheMiss
 		}
-		log.Errorf("redis: get product cache failed: %v", err.Error())
+		klog.Errorf("redis: get product cache failed: %v", err.Error())
 		return nil, err
 	}
 	if data == NotFoundMarker {
-		log.Warnf("redis: product by id [%d] is null value", productId)
+		klog.Warnf("redis: product by id [%d] is null value", productId)
 		return &model.Product{}, nil
 	}
 
 	var product model.Product
 	if err := json.Unmarshal([]byte(data), &product); err != nil {
-		log.Errorf("redis: unmarshal product cache failed: %v", err.Error())
+		klog.Errorf("redis: unmarshal product cache failed: %v", err.Error())
 		return nil, ErrInvalidCache
 	}
 
@@ -86,7 +86,7 @@ func (cache *ProductCache) MGet(ctx context.Context, productIds []uint) (map[uin
 
 	results, err := cache.client.MGet(ctx, cacheKeys...).Result()
 	if err != nil {
-		log.Errorf("redis: mGet product cache failed: %v", err.Error())
+		klog.Errorf("redis: mGet product cache failed: %v", err.Error())
 		return nil, err
 	}
 
@@ -119,12 +119,12 @@ func (cache *ProductCache) Set(ctx context.Context, product *model.Product) erro
 	data, err := json.Marshal(product)
 
 	if err != nil {
-		log.Errorf("redis: marshal product cache failed: %v", err.Error())
+		klog.Errorf("redis: marshal product cache failed: %v", err.Error())
 		return err
 	}
 
 	if err = cache.safeSetCache(ctx, cacheKey, data); err != nil {
-		log.Errorf("redis: set product cache failed: %v", err.Error())
+		klog.Errorf("redis: set product cache failed: %v", err.Error())
 		return err
 	}
 
@@ -143,7 +143,7 @@ func (cache *ProductCache) SetBatch(ctx context.Context, products []*model.Produ
 	}
 
 	if _, err := pipe.Exec(ctx); err != nil {
-		log.Errorf("redis pipe set product cache failed: %v", err.Error())
+		klog.Errorf("redis pipe set product cache failed: %v", err.Error())
 	}
 }
 
@@ -153,7 +153,7 @@ func (cache *ProductCache) SetNotFound(ctx context.Context, productId uint) erro
 	err := cache.client.Set(ctx, cacheKey, NotFoundMarker, NotFoundTTL).Err()
 
 	if err != nil {
-		log.Errorf("redis: set product not found cache failed: %v", err.Error())
+		klog.Errorf("redis: set product not found cache failed: %v", err.Error())
 	}
 
 	return err
@@ -165,7 +165,7 @@ func (cache *ProductCache) Delete(ctx context.Context, productId uint) error {
 	err := cache.client.Del(ctx, cacheKey).Err()
 
 	if err != nil {
-		log.Errorf("redis: delete product cache failed: %v", err.Error())
+		klog.Errorf("redis: delete product cache failed: %v", err.Error())
 	}
 
 	return err

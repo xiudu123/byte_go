@@ -1,7 +1,6 @@
 package service
 
 import (
-	"byte_go/backend/app/product/biz/dal/mysql"
 	"byte_go/backend/app/product/biz/dal/repository"
 	"byte_go/backend/app/product/biz/model"
 	product "byte_go/backend/rpc_gen/kitex_gen/product"
@@ -25,7 +24,7 @@ func (s *CreateCategoryService) Run(req *product.CreateCategoryReq) (resp *produ
 		return nil, kitex_err.RequestParamError
 	}
 
-	categoryQuery := repository.NewCategoryRepository(s.ctx, mysql.DB)
+	categoryQuery := repository.NewCategoryRepository(s.ctx)
 
 	// 判断分类是否存在
 	categoryExist, err := categoryQuery.ExistCategoryByName(req.Name)
