@@ -15,7 +15,7 @@ RUN cd app/frontend/ && go mod download
 COPY ../app/frontend app/frontend
 
 RUN go clean -modcache && \
-    cd app/frontend && CGO_ENABLED=0 GOOS=linux go build -v -o /opt/byte_go/frontend/server
+    cd app/frontend && CGO_ENABLED=0 GOOS=linux go build -mod=mod -v -o /opt/byte_go/frontend/server
 
 
 FROM busybox

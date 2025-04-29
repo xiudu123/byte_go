@@ -2,13 +2,12 @@ package cache
 
 import (
 	"byte_go/backend/app/user/biz/model"
+	base_cache "byte_go/backend/utils/base-cache"
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
-	"github.com/cloudwego/kitex/pkg/klog"
 	"github.com/redis/go-redis/v9"
-	"math/rand"
+	"golang.org/x/sync/errgroup"
 	"time"
 )
 
@@ -16,144 +15,127 @@ import (
  * @author: 锈渎
  * @date: 2025/4/28 16:09
  * @code: 面向对象面向君， 不负代码不负卿。
- * @description:
- */
+ * @description: user缓存
+
+错误日志都放在base_cache中，这里只需要关注缓存的逻辑
+*/
 
 const (
-	UserByIdCacheKey    = "user:id:"
-	UserByEmailCacheKey = "user:email:"
+	UserByIdCacheKey    = "user:id"
+	UserByEmailCacheKey = "user:email"
 	DefaultExpiration   = 24 * time.Hour
 	NotFoundTTL         = 5 * time.Minute
-	NotFoundMarker      = "NOT_FOUND"
-)
-
-var (
-	ErrCacheMiss    = errors.New("cache miss")
-	ErrInvalidCache = errors.New("invalid cache")
 )
 
 type UserCache struct {
-	client      *redis.Client
-	prefixId    string
-	prefixEmail string
-}
-
-func randomExpiration(cacheExpire time.Duration) time.Duration {
-	return cacheExpire + time.Duration(rand.Intn(300))*time.Second
+	base      *base_cache.BaseCache[uint]
+	emailPool *base_cache.BaseCache[string]
 }
 
 func NewUserCache(client *redis.Client) *UserCache {
 	return &UserCache{
-		client:      client,
-		prefixId:    UserByIdCacheKey,
-		prefixEmail: UserByEmailCacheKey,
+		base: base_cache.NewBaseCache[uint](client, base_cache.BaseCacheConfig{
+			KeyPrefix:         UserByIdCacheKey,
+			DefaultExpiration: DefaultExpiration,
+			NotFoundTTL:       NotFoundTTL,
+			MaxRetries:        3,
+		}),
+		emailPool: base_cache.NewBaseCache[string](client, base_cache.BaseCacheConfig{
+			KeyPrefix:         UserByEmailCacheKey,
+			DefaultExpiration: DefaultExpiration,
+			NotFoundTTL:       NotFoundTTL,
+			MaxRetries:        3,
+		}),
 	}
 }
-func (cache *UserCache) safeSetCache(ctx context.Context, key string, value []byte) error {
-	const maxRetries = 3
-	var err error
-	for i := 0; i < maxRetries; i++ {
-		if err = cache.client.Set(ctx, key, value, randomExpiration(DefaultExpiration)).Err(); err == nil {
-			return nil
-		}
-		time.Sleep(time.Duration(i*100) * time.Millisecond)
-	}
-	return err
-}
 
-func (cache *UserCache) BuildUserIdKey(userId uint) string {
-	return fmt.Sprintf("%s%d", cache.prefixId, userId)
-}
-
-func (cache *UserCache) BuildUserEmailKey(email string) string {
-	return fmt.Sprintf("%s%s", cache.prefixEmail, email)
-}
-
-func (cache *UserCache) GetById(ctx context.Context, userId uint) (*model.User, error) {
-	cacheKey := cache.BuildUserIdKey(userId)
-	data, err := cache.client.Get(ctx, cacheKey).Result()
-	if err != nil {
-		if err == redis.Nil {
-			return nil, ErrCacheMiss
-		}
-		klog.Errorf("redis: get user by id failed: %v", err.Error())
+// userUnmarshal 反序列化user数据
+func userUnmarshal(data []byte) (interface{}, error) {
+	var u model.User
+	if err := json.Unmarshal(data, &u); err != nil {
 		return nil, err
 	}
-	if data == NotFoundMarker {
-		klog.Warnf("redis: user by id [%d] is not value", userId)
-		return &model.User{}, nil
+	return &u, nil
+}
+
+// idUnmarshal 反序列化id数据(用于邮箱映射)
+func idUnmarshal(data []byte) (interface{}, error) {
+	var id uint
+	if err := json.Unmarshal(data, &id); err != nil {
+		return nil, err
 	}
+	return id, nil
+}
+
+// BuildUserIdKey 构建用户ID缓存键
+func (cache *UserCache) BuildUserIdKey(userId uint) string {
+	return cache.base.BuildKey(userId)
+}
+
+// BuildUserEmailKey 构建用户邮箱缓存键
+func (cache *UserCache) BuildUserEmailKey(email string) string {
+	return cache.emailPool.BuildKey(email)
+}
+
+// GetById 从缓存中获取用户信息
+func (cache *UserCache) GetById(ctx context.Context, userId uint) (*model.User, error) {
 	var user model.User
-	if err = json.Unmarshal([]byte(data), &user); err != nil {
-		klog.Errorf("redis: unmarshal user by id failed: %v", err.Error())
-		return nil, ErrInvalidCache
+	if err := cache.base.Get(ctx, userId, &user); err != nil {
+		return nil, err
 	}
 	return &user, nil
 }
 
+// GetByEmail 从缓存中获取用户ID
 func (cache *UserCache) GetByEmail(ctx context.Context, email string) (userId uint, err error) {
-	cacheKey := cache.BuildUserEmailKey(email)
-	data, err := cache.client.Get(ctx, cacheKey).Result()
-
-	if err != nil {
-		if err == redis.Nil {
-			return 0, ErrCacheMiss
-		}
-		klog.Errorf("redis: get user by email failed: %v", err.Error())
+	if err = cache.emailPool.Get(ctx, email, &userId); err != nil {
 		return 0, err
-	}
-	if data == NotFoundMarker {
-		klog.Warnf("redis: user by email [%s] is not value", email)
-		return 0, nil
-	}
-
-	if err = json.Unmarshal([]byte(data), &userId); err != nil {
-		klog.Errorf("redis: unmarshal user by email failed: %v", err.Error())
-		return 0, ErrInvalidCache
 	}
 	return userId, nil
 }
 
+// Set 缓存用户信息
 func (cache *UserCache) Set(ctx context.Context, user *model.User) error {
-	cacheKey := cache.BuildUserIdKey(user.ID)
-	userData, err := json.Marshal(user)
-	if err != nil {
-		klog.Errorf("redis: marshal user failed: %v", err.Error())
-		return err
-	}
 
-	// 缓存 邮箱 -> ID 映射
-	emailKey := cache.BuildUserEmailKey(user.Email)
-	pipe := cache.client.Pipeline()
-	pipe.Set(ctx, cacheKey, userData, randomExpiration(DefaultExpiration))
-	pipe.Set(ctx, emailKey, user.ID, randomExpiration(DefaultExpiration))
-	if _, err := pipe.Exec(ctx); err != nil {
-		klog.Errorf("redis: set user failed: %v", err.Error())
-		return err
-	}
-	return nil
+	// 创建带取消功能的错误组
+	g, ctx := errgroup.WithContext(ctx)
+
+	// 并发设置缓存
+	g.Go(func() error {
+		return cache.base.SafeSet(ctx, user.ID, user)
+	})
+	g.Go(func() error {
+		return cache.emailPool.SafeSet(ctx, user.Email, user.ID)
+	})
+
+	// 等待所有操作完成
+	return g.Wait()
 }
+
+// Delete 删除用户缓存
 func (cache *UserCache) Delete(ctx context.Context, user *model.User) error {
-	cacheKeys := []string{
-		cache.BuildUserIdKey(user.ID),
-		cache.BuildUserEmailKey(user.Email),
-	}
-	if _, err := cache.client.Del(ctx, cacheKeys...).Result(); err != nil {
-		klog.Errorf("redis: delete user failed: %v", err.Error())
-		return err
-	}
-	return nil
+
+	g, ctx := errgroup.WithContext(ctx)
+
+	g.Go(func() error {
+		return cache.base.Delete(ctx, user.ID)
+	})
+
+	g.Go(func() error {
+		return cache.emailPool.Delete(ctx, user.Email)
+	})
+
+	return g.Wait()
 }
 
+// SetNotFound 设置空值缓存
 func (cache *UserCache) SetNotFound(ctx context.Context, keyType string, value interface{}) error {
-	var cacheKey string
 	switch keyType {
 	case UserByIdCacheKey:
-		cacheKey = cache.BuildUserIdKey(value.(uint))
+		return cache.base.SetNotFound(ctx, value.(uint))
 	case UserByEmailCacheKey:
-		cacheKey = cache.BuildUserEmailKey(value.(string))
+		return cache.emailPool.SetNotFound(ctx, value.(string))
 	default:
 		return fmt.Errorf("invalid key type: %s", keyType)
 	}
-	return cache.client.Set(ctx, cacheKey, NotFoundMarker, NotFoundTTL).Err()
 }

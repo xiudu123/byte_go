@@ -17,7 +17,7 @@ RUN cd app/${SVC}/ && go mod download
 COPY ../app/${SVC} app/${SVC}
 
 RUN go clean -modcache && \
-    cd app/${SVC} && CGO_ENABLED=0 GOOS=linux go build -v -o /opt/byte_go/${SVC}/server
+    cd app/${SVC} && CGO_ENABLED=0 GOOS=linux go build -mod=mod -v -o /opt/byte_go/${SVC}/server
 
 
 FROM busybox
