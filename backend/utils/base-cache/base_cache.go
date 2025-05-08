@@ -44,6 +44,15 @@ type BaseCache[T keyType] struct {
 }
 
 func NewBaseCache[T keyType](client *redis.Client, config BaseCacheConfig) *BaseCache[T] {
+	if config.NotFoundTTL == 0 {
+		config.NotFoundTTL = 5 * time.Minute
+	}
+	if config.MaxRetries == 0 {
+		config.MaxRetries = 3
+	}
+	if config.DefaultExpiration == 0 {
+		config.DefaultExpiration = 24 * time.Hour
+	}
 	return &BaseCache[T]{
 		client: client,
 		config: config,

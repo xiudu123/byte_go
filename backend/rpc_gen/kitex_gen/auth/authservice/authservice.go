@@ -37,13 +37,6 @@ var serviceMethods = map[string]kitex.MethodInfo{
 		false,
 		kitex.WithStreamingMode(kitex.StreamingUnary),
 	),
-	"DeleteTokenListByRPC": kitex.NewMethodInfo(
-		deleteTokenListByRPCHandler,
-		newDeleteTokenListByRPCArgs,
-		newDeleteTokenListByRPCResult,
-		false,
-		kitex.WithStreamingMode(kitex.StreamingUnary),
-	),
 }
 
 var (
@@ -569,159 +562,6 @@ func (p *DeleteTokenByRPCResult) GetResult() interface{} {
 	return p.Success
 }
 
-func deleteTokenListByRPCHandler(ctx context.Context, handler interface{}, arg, result interface{}) error {
-	switch s := arg.(type) {
-	case *streaming.Args:
-		st := s.Stream
-		req := new(auth.DeleteTokenListReq)
-		if err := st.RecvMsg(req); err != nil {
-			return err
-		}
-		resp, err := handler.(auth.AuthService).DeleteTokenListByRPC(ctx, req)
-		if err != nil {
-			return err
-		}
-		return st.SendMsg(resp)
-	case *DeleteTokenListByRPCArgs:
-		success, err := handler.(auth.AuthService).DeleteTokenListByRPC(ctx, s.Req)
-		if err != nil {
-			return err
-		}
-		realResult := result.(*DeleteTokenListByRPCResult)
-		realResult.Success = success
-		return nil
-	default:
-		return errInvalidMessageType
-	}
-}
-func newDeleteTokenListByRPCArgs() interface{} {
-	return &DeleteTokenListByRPCArgs{}
-}
-
-func newDeleteTokenListByRPCResult() interface{} {
-	return &DeleteTokenListByRPCResult{}
-}
-
-type DeleteTokenListByRPCArgs struct {
-	Req *auth.DeleteTokenListReq
-}
-
-func (p *DeleteTokenListByRPCArgs) FastRead(buf []byte, _type int8, number int32) (n int, err error) {
-	if !p.IsSetReq() {
-		p.Req = new(auth.DeleteTokenListReq)
-	}
-	return p.Req.FastRead(buf, _type, number)
-}
-
-func (p *DeleteTokenListByRPCArgs) FastWrite(buf []byte) (n int) {
-	if !p.IsSetReq() {
-		return 0
-	}
-	return p.Req.FastWrite(buf)
-}
-
-func (p *DeleteTokenListByRPCArgs) Size() (n int) {
-	if !p.IsSetReq() {
-		return 0
-	}
-	return p.Req.Size()
-}
-
-func (p *DeleteTokenListByRPCArgs) Marshal(out []byte) ([]byte, error) {
-	if !p.IsSetReq() {
-		return out, nil
-	}
-	return proto.Marshal(p.Req)
-}
-
-func (p *DeleteTokenListByRPCArgs) Unmarshal(in []byte) error {
-	msg := new(auth.DeleteTokenListReq)
-	if err := proto.Unmarshal(in, msg); err != nil {
-		return err
-	}
-	p.Req = msg
-	return nil
-}
-
-var DeleteTokenListByRPCArgs_Req_DEFAULT *auth.DeleteTokenListReq
-
-func (p *DeleteTokenListByRPCArgs) GetReq() *auth.DeleteTokenListReq {
-	if !p.IsSetReq() {
-		return DeleteTokenListByRPCArgs_Req_DEFAULT
-	}
-	return p.Req
-}
-
-func (p *DeleteTokenListByRPCArgs) IsSetReq() bool {
-	return p.Req != nil
-}
-
-func (p *DeleteTokenListByRPCArgs) GetFirstArgument() interface{} {
-	return p.Req
-}
-
-type DeleteTokenListByRPCResult struct {
-	Success *common.Empty
-}
-
-var DeleteTokenListByRPCResult_Success_DEFAULT *common.Empty
-
-func (p *DeleteTokenListByRPCResult) FastRead(buf []byte, _type int8, number int32) (n int, err error) {
-	if !p.IsSetSuccess() {
-		p.Success = new(common.Empty)
-	}
-	return p.Success.FastRead(buf, _type, number)
-}
-
-func (p *DeleteTokenListByRPCResult) FastWrite(buf []byte) (n int) {
-	if !p.IsSetSuccess() {
-		return 0
-	}
-	return p.Success.FastWrite(buf)
-}
-
-func (p *DeleteTokenListByRPCResult) Size() (n int) {
-	if !p.IsSetSuccess() {
-		return 0
-	}
-	return p.Success.Size()
-}
-
-func (p *DeleteTokenListByRPCResult) Marshal(out []byte) ([]byte, error) {
-	if !p.IsSetSuccess() {
-		return out, nil
-	}
-	return proto.Marshal(p.Success)
-}
-
-func (p *DeleteTokenListByRPCResult) Unmarshal(in []byte) error {
-	msg := new(common.Empty)
-	if err := proto.Unmarshal(in, msg); err != nil {
-		return err
-	}
-	p.Success = msg
-	return nil
-}
-
-func (p *DeleteTokenListByRPCResult) GetSuccess() *common.Empty {
-	if !p.IsSetSuccess() {
-		return DeleteTokenListByRPCResult_Success_DEFAULT
-	}
-	return p.Success
-}
-
-func (p *DeleteTokenListByRPCResult) SetSuccess(x interface{}) {
-	p.Success = x.(*common.Empty)
-}
-
-func (p *DeleteTokenListByRPCResult) IsSetSuccess() bool {
-	return p.Success != nil
-}
-
-func (p *DeleteTokenListByRPCResult) GetResult() interface{} {
-	return p.Success
-}
-
 type kClient struct {
 	c client.Client
 }
@@ -757,16 +597,6 @@ func (p *kClient) DeleteTokenByRPC(ctx context.Context, Req *auth.DeleteTokenReq
 	_args.Req = Req
 	var _result DeleteTokenByRPCResult
 	if err = p.c.Call(ctx, "DeleteTokenByRPC", &_args, &_result); err != nil {
-		return
-	}
-	return _result.GetSuccess(), nil
-}
-
-func (p *kClient) DeleteTokenListByRPC(ctx context.Context, Req *auth.DeleteTokenListReq) (r *common.Empty, err error) {
-	var _args DeleteTokenListByRPCArgs
-	_args.Req = Req
-	var _result DeleteTokenListByRPCResult
-	if err = p.c.Call(ctx, "DeleteTokenListByRPC", &_args, &_result); err != nil {
 		return
 	}
 	return _result.GetSuccess(), nil

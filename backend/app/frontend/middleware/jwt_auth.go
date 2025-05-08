@@ -37,8 +37,9 @@ func JwtAuthMiddleware() app.HandlerFunc {
 
 		// 从header中获取token
 		authHeader := string(ctx.GetHeader("Authorization"))
+		userId := ctx.GetUint32("userId")
 		// 验证token
-		claims, err := rpc.AuthClient.VerifyTokenByRPC(c, &rpcAuth.VerifyTokenReq{Token: authHeader})
+		claims, err := rpc.AuthClient.VerifyTokenByRPC(c, &rpcAuth.VerifyTokenReq{Token: authHeader, UserId: userId})
 		if err != nil {
 			ctx.AbortWithStatusJSON(401, "请重新登录")
 			return

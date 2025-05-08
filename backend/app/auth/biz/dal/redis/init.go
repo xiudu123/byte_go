@@ -4,12 +4,35 @@ import (
 	"byte_go/backend/app/auth/conf"
 	"context"
 	"github.com/redis/go-redis/v9"
-	"strconv"
 )
 
 var (
 	RedisClient *redis.Client
 )
+
+type defaultHook struct{}
+
+func (d *defaultHook) DialHook(next redis.DialHook) redis.DialHook {
+	return next
+}
+func (d *defaultHook) ProcessHook(next redis.ProcessHook) redis.ProcessHook {
+	return func(ctx context.Context, cmd redis.Cmder) error {
+		err := next(ctx, cmd)
+		if err == redis.Nil {
+			switch v := cmd.(type) {
+			case *redis.StringCmd:
+				v.SetVal("0")
+			case *redis.IntCmd:
+				v.SetVal(0)
+			}
+		}
+		return nil
+	}
+}
+
+func (d *defaultHook) ProcessPipelineHook(next redis.ProcessPipelineHook) redis.ProcessPipelineHook {
+	return next
+}
 
 func Init() {
 	RedisClient = redis.NewClient(&redis.Options{
@@ -18,27 +41,12 @@ func Init() {
 		Password: conf.GetConf().Redis.Password,
 		DB:       conf.GetConf().Redis.DB,
 	})
+
+	// 添加默认值处理包装器
+	RedisClient.AddHook(&defaultHook{})
+
 	if err := RedisClient.Ping(context.Background()).Err(); err != nil {
 		panic(err)
 	}
-}
 
-func SetJTI(ctx context.Context, userId uint32, jti string) (err error) {
-	return RedisClient.SAdd(ctx, "jti_list:"+strconv.Itoa(int(userId)), jti).Err()
-}
-
-func ListJTIList(ctx context.Context, userId uint32) ([]string, error) {
-	return RedisClient.SMembers(ctx, "jti_list:"+strconv.Itoa(int(userId))).Result()
-}
-
-func AddJTI2BlackListed(ctx context.Context, jti string) (err error) {
-	return RedisClient.SAdd(ctx, "blacklisted:jti", jti).Err()
-}
-
-func AddJTIList2BlackListed(ctx context.Context, jtiList []string) (err error) {
-	return RedisClient.SAdd(ctx, "blacklisted:jti", jtiList).Err()
-}
-
-func CheckJITIsBlackListed(ctx context.Context, jti string) (bool, error) {
-	return RedisClient.SIsMember(ctx, "blacklisted:jti", jti).Result()
 }

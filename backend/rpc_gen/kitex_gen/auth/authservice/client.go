@@ -15,7 +15,6 @@ type Client interface {
 	DeliverTokenByRPC(ctx context.Context, Req *auth.DeliverTokenReq, callOptions ...callopt.Option) (r *auth.DeliveryResp, err error)
 	VerifyTokenByRPC(ctx context.Context, Req *auth.VerifyTokenReq, callOptions ...callopt.Option) (r *auth.VerifyResp, err error)
 	DeleteTokenByRPC(ctx context.Context, Req *auth.DeleteTokenReq, callOptions ...callopt.Option) (r *common.Empty, err error)
-	DeleteTokenListByRPC(ctx context.Context, Req *auth.DeleteTokenListReq, callOptions ...callopt.Option) (r *common.Empty, err error)
 }
 
 // NewClient creates a client for the service defined in IDL.
@@ -60,9 +59,4 @@ func (p *kAuthServiceClient) VerifyTokenByRPC(ctx context.Context, Req *auth.Ver
 func (p *kAuthServiceClient) DeleteTokenByRPC(ctx context.Context, Req *auth.DeleteTokenReq, callOptions ...callopt.Option) (r *common.Empty, err error) {
 	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
 	return p.kClient.DeleteTokenByRPC(ctx, Req)
-}
-
-func (p *kAuthServiceClient) DeleteTokenListByRPC(ctx context.Context, Req *auth.DeleteTokenListReq, callOptions ...callopt.Option) (r *common.Empty, err error) {
-	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
-	return p.kClient.DeleteTokenListByRPC(ctx, Req)
 }

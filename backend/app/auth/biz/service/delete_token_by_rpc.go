@@ -1,7 +1,7 @@
 package service
 
 import (
-	"byte_go/backend/app/auth/biz/dal/redis"
+	"byte_go/backend/app/auth/biz/dal/repository"
 	auth "byte_go/backend/rpc_gen/kitex_gen/auth"
 	common "byte_go/backend/rpc_gen/kitex_gen/common"
 	"byte_go/kitex_err"
@@ -26,8 +26,11 @@ func (s *DeleteTokenByRPCService) Run(req *auth.DeleteTokenReq) (resp *common.Em
 	if req == nil || req.Jti == "" {
 		return nil, kitex_err.JTIEmptyError
 	}
+
+	authRepo := repository.NewAuthRepository(s.ctx)
+
 	// 加入黑名单
-	if err = redis.AddJTI2BlackListed(s.ctx, req.Jti); err != nil {
+	if err = authRepo.SetJTIBlackListed(s.ctx, req.Jti); err != nil {
 		klog.Errorf("redis blacklist add failed for jti:%s, error:%v", req.Jti, err)
 		return nil, kitex_err.RedisError
 	}

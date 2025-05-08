@@ -26,7 +26,8 @@ type Claims struct {
 
 var TokenTTL = 24 * time.Hour
 
-func GenerateToken(userId uint32) (string, string, error) {
+func GenerateToken(userId uint32, permissionVersion int64) (string, string, error) {
+	secretKey := append(SecretKey, []byte(fmt.Sprintf("%d", permissionVersion))...)
 	jti := fmt.Sprintf("jwt-%d-%d", userId, time.Now().Unix())
 	claims := &Claims{
 		UserId: userId,
@@ -38,13 +39,14 @@ func GenerateToken(userId uint32) (string, string, error) {
 		},
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	tokenString, err := token.SignedString(SecretKey)
+	tokenString, err := token.SignedString(secretKey)
 	return tokenString, jti, err
 }
 
-func ParseToken(tokenString string) (*Claims, error) {
+func ParseToken(tokenString string, permissionVersion int64) (*Claims, error) {
+	secretKey := append(SecretKey, []byte(fmt.Sprintf("%d", permissionVersion))...)
 	token, err := jwt.ParseWithClaims(tokenString, &Claims{}, func(token *jwt.Token) (interface{}, error) {
-		return SecretKey, nil
+		return secretKey, nil
 	})
 	if claims, ok := token.Claims.(*Claims); ok && token.Valid {
 		return claims, nil

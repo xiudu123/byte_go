@@ -1,7 +1,7 @@
 package service
 
 import (
-	"byte_go/backend/app/auth/biz/dal/redis"
+	"byte_go/backend/app/auth/biz/dal/repository"
 	auth "byte_go/backend/rpc_gen/kitex_gen/auth"
 	"byte_go/backend/utils"
 	"byte_go/kitex_err"
@@ -28,17 +28,18 @@ func (s *DeliverTokenByRPCService) Run(req *auth.DeliverTokenReq) (resp *auth.De
 		return nil, kitex_err.RequestParamError
 	}
 
+	authRepo := repository.NewAuthRepository(s.ctx)
+
 	// 生成 token
-	token, jti, err := utils.GenerateToken(req.UserId)
+	permissionVersion, err := authRepo.GetPermissionVersion(s.ctx, req.UserId)
+	if err != nil {
+		klog.Error("get permission version failed: ", err.Error())
+		return nil, kitex_err.RedisError
+	}
+	token, _, err := utils.GenerateToken(req.UserId, permissionVersion)
 	if err != nil {
 		klog.Error("token generate failed: ", err.Error())
 		return nil, kitex_err.TokenCreateError
-	}
-
-	// 存入 redis
-	if err = redis.SetJTI(s.ctx, req.UserId, jti); err != nil {
-		klog.Error("redis set jti failed: ", err.Error())
-		return nil, kitex_err.RedisError
 	}
 
 	// 返回

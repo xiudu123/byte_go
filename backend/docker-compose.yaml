@@ -212,6 +212,8 @@ services:
       dockerfile: ./deploy/Dockerfile-svc
       args:
         - SVC=user
+    container_name: byte_go-user
+    image: byte_go-user:latest
     environment:
       - GO_ENV=dev
       - MYSQL_USER=root

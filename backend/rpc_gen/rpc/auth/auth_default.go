@@ -34,12 +34,3 @@ func DeleteTokenByRPC(ctx context.Context, req *auth.DeleteTokenReq, callOptions
 	}
 	return resp, nil
 }
-
-func DeleteTokenListByRPC(ctx context.Context, req *auth.DeleteTokenListReq, callOptions ...callopt.Option) (resp *common.Empty, err error) {
-	resp, err = defaultClient.DeleteTokenListByRPC(ctx, req, callOptions...)
-	if err != nil {
-		klog.CtxErrorf(ctx, "DeleteTokenListByRPC call failed,err =%+v", err)
-		return nil, err
-	}
-	return resp, nil
-}

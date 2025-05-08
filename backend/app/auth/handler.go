@@ -1,10 +1,10 @@
 package main
 
 import (
+	"byte_go/backend/app/auth/biz/service"
 	auth "byte_go/backend/rpc_gen/kitex_gen/auth"
 	"byte_go/backend/rpc_gen/kitex_gen/common"
 	"context"
-	"byte_go/backend/app/auth/biz/service"
 )
 
 // AuthServiceImpl implements the last service interface defined in the IDL.
@@ -27,13 +27,6 @@ func (s *AuthServiceImpl) VerifyTokenByRPC(ctx context.Context, req *auth.Verify
 // DeleteTokenByRPC implements the AuthServiceImpl interface.
 func (s *AuthServiceImpl) DeleteTokenByRPC(ctx context.Context, req *auth.DeleteTokenReq) (resp *common.Empty, err error) {
 	resp, err = service.NewDeleteTokenByRPCService(ctx).Run(req)
-
-	return resp, err
-}
-
-// DeleteTokenListByRPC implements the AuthServiceImpl interface.
-func (s *AuthServiceImpl) DeleteTokenListByRPC(ctx context.Context, req *auth.DeleteTokenListReq) (resp *common.Empty, err error) {
-	resp, err = service.NewDeleteTokenListByRPCService(ctx).Run(req)
 
 	return resp, err
 }

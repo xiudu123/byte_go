@@ -1,7 +1,7 @@
 package service
 
 import (
-	"byte_go/backend/app/auth/biz/dal/redis"
+	"byte_go/backend/app/auth/biz/dal/repository"
 	auth "byte_go/backend/rpc_gen/kitex_gen/auth"
 	"byte_go/backend/utils"
 	"byte_go/kitex_err"
@@ -26,11 +26,15 @@ func NewVerifyTokenByRPCService(ctx context.Context) *VerifyTokenByRPCService {
 // @error token为空/解析错误/过期/验证错误/redis错误
 func (s *VerifyTokenByRPCService) Run(req *auth.VerifyTokenReq) (resp *auth.VerifyResp, err error) {
 
-	// 解析token
 	if req == nil || req.Token == "" {
 		return nil, kitex_err.TokenEmptyError
 	}
-	claims, err := utils.ParseToken(req.Token)
+
+	authRepo := repository.NewAuthRepository(s.ctx)
+
+	// 解析token
+	permissionVersion, err := authRepo.GetPermissionVersion(s.ctx, req.UserId)
+	claims, err := utils.ParseToken(req.Token, permissionVersion)
 	if err != nil {
 		klog.Error("token parse failed: ", err.Error())
 		return nil, kitex_err.TokenParseError
@@ -45,7 +49,7 @@ func (s *VerifyTokenByRPCService) Run(req *auth.VerifyTokenReq) (resp *auth.Veri
 	if claims == nil || claims.JTI == "" {
 		return nil, kitex_err.TokenValidError
 	}
-	exist, err := redis.CheckJITIsBlackListed(s.ctx, claims.JTI)
+	exist, err := authRepo.IsJTIBlackListed(s.ctx, claims.JTI)
 	if err != nil {
 		klog.Error("check jti is blacklisted failed: ", err.Error())
 		return nil, kitex_err.RedisError
