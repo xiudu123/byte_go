@@ -2,8 +2,8 @@ FROM golang:1.22.5 AS builder
 
 WORKDIR /usr/src/byte_go/backend
 
-#ENV GOPROXY=https://goproxy.cn,https://goproxy.io,https://mirrors.aliyun.com/goproxy/,https://proxy.golang.org,direct
-ENV GOPROXY=https://goproxy.cn,direct
+ENV GOPROXY=https://goproxy.cn,https://goproxy.io,https://mirrors.aliyun.com/goproxy/,https://proxy.golang.org,direct
+#ENV GOPROXY=https://goproxy.cn,direct
 ENV GOSUMDB=sum.golang.google.cn
 ENV GOPROXY_TIMEOUT=300
 

@@ -37,6 +37,13 @@ var serviceMethods = map[string]kitex.MethodInfo{
 		false,
 		kitex.WithStreamingMode(kitex.StreamingUnary),
 	),
+	"ClearUserTokensByRPC": kitex.NewMethodInfo(
+		clearUserTokensByRPCHandler,
+		newClearUserTokensByRPCArgs,
+		newClearUserTokensByRPCResult,
+		false,
+		kitex.WithStreamingMode(kitex.StreamingUnary),
+	),
 }
 
 var (
@@ -562,6 +569,159 @@ func (p *DeleteTokenByRPCResult) GetResult() interface{} {
 	return p.Success
 }
 
+func clearUserTokensByRPCHandler(ctx context.Context, handler interface{}, arg, result interface{}) error {
+	switch s := arg.(type) {
+	case *streaming.Args:
+		st := s.Stream
+		req := new(auth.ClearUserTokensReq)
+		if err := st.RecvMsg(req); err != nil {
+			return err
+		}
+		resp, err := handler.(auth.AuthService).ClearUserTokensByRPC(ctx, req)
+		if err != nil {
+			return err
+		}
+		return st.SendMsg(resp)
+	case *ClearUserTokensByRPCArgs:
+		success, err := handler.(auth.AuthService).ClearUserTokensByRPC(ctx, s.Req)
+		if err != nil {
+			return err
+		}
+		realResult := result.(*ClearUserTokensByRPCResult)
+		realResult.Success = success
+		return nil
+	default:
+		return errInvalidMessageType
+	}
+}
+func newClearUserTokensByRPCArgs() interface{} {
+	return &ClearUserTokensByRPCArgs{}
+}
+
+func newClearUserTokensByRPCResult() interface{} {
+	return &ClearUserTokensByRPCResult{}
+}
+
+type ClearUserTokensByRPCArgs struct {
+	Req *auth.ClearUserTokensReq
+}
+
+func (p *ClearUserTokensByRPCArgs) FastRead(buf []byte, _type int8, number int32) (n int, err error) {
+	if !p.IsSetReq() {
+		p.Req = new(auth.ClearUserTokensReq)
+	}
+	return p.Req.FastRead(buf, _type, number)
+}
+
+func (p *ClearUserTokensByRPCArgs) FastWrite(buf []byte) (n int) {
+	if !p.IsSetReq() {
+		return 0
+	}
+	return p.Req.FastWrite(buf)
+}
+
+func (p *ClearUserTokensByRPCArgs) Size() (n int) {
+	if !p.IsSetReq() {
+		return 0
+	}
+	return p.Req.Size()
+}
+
+func (p *ClearUserTokensByRPCArgs) Marshal(out []byte) ([]byte, error) {
+	if !p.IsSetReq() {
+		return out, nil
+	}
+	return proto.Marshal(p.Req)
+}
+
+func (p *ClearUserTokensByRPCArgs) Unmarshal(in []byte) error {
+	msg := new(auth.ClearUserTokensReq)
+	if err := proto.Unmarshal(in, msg); err != nil {
+		return err
+	}
+	p.Req = msg
+	return nil
+}
+
+var ClearUserTokensByRPCArgs_Req_DEFAULT *auth.ClearUserTokensReq
+
+func (p *ClearUserTokensByRPCArgs) GetReq() *auth.ClearUserTokensReq {
+	if !p.IsSetReq() {
+		return ClearUserTokensByRPCArgs_Req_DEFAULT
+	}
+	return p.Req
+}
+
+func (p *ClearUserTokensByRPCArgs) IsSetReq() bool {
+	return p.Req != nil
+}
+
+func (p *ClearUserTokensByRPCArgs) GetFirstArgument() interface{} {
+	return p.Req
+}
+
+type ClearUserTokensByRPCResult struct {
+	Success *common.Empty
+}
+
+var ClearUserTokensByRPCResult_Success_DEFAULT *common.Empty
+
+func (p *ClearUserTokensByRPCResult) FastRead(buf []byte, _type int8, number int32) (n int, err error) {
+	if !p.IsSetSuccess() {
+		p.Success = new(common.Empty)
+	}
+	return p.Success.FastRead(buf, _type, number)
+}
+
+func (p *ClearUserTokensByRPCResult) FastWrite(buf []byte) (n int) {
+	if !p.IsSetSuccess() {
+		return 0
+	}
+	return p.Success.FastWrite(buf)
+}
+
+func (p *ClearUserTokensByRPCResult) Size() (n int) {
+	if !p.IsSetSuccess() {
+		return 0
+	}
+	return p.Success.Size()
+}
+
+func (p *ClearUserTokensByRPCResult) Marshal(out []byte) ([]byte, error) {
+	if !p.IsSetSuccess() {
+		return out, nil
+	}
+	return proto.Marshal(p.Success)
+}
+
+func (p *ClearUserTokensByRPCResult) Unmarshal(in []byte) error {
+	msg := new(common.Empty)
+	if err := proto.Unmarshal(in, msg); err != nil {
+		return err
+	}
+	p.Success = msg
+	return nil
+}
+
+func (p *ClearUserTokensByRPCResult) GetSuccess() *common.Empty {
+	if !p.IsSetSuccess() {
+		return ClearUserTokensByRPCResult_Success_DEFAULT
+	}
+	return p.Success
+}
+
+func (p *ClearUserTokensByRPCResult) SetSuccess(x interface{}) {
+	p.Success = x.(*common.Empty)
+}
+
+func (p *ClearUserTokensByRPCResult) IsSetSuccess() bool {
+	return p.Success != nil
+}
+
+func (p *ClearUserTokensByRPCResult) GetResult() interface{} {
+	return p.Success
+}
+
 type kClient struct {
 	c client.Client
 }
@@ -597,6 +757,16 @@ func (p *kClient) DeleteTokenByRPC(ctx context.Context, Req *auth.DeleteTokenReq
 	_args.Req = Req
 	var _result DeleteTokenByRPCResult
 	if err = p.c.Call(ctx, "DeleteTokenByRPC", &_args, &_result); err != nil {
+		return
+	}
+	return _result.GetSuccess(), nil
+}
+
+func (p *kClient) ClearUserTokensByRPC(ctx context.Context, Req *auth.ClearUserTokensReq) (r *common.Empty, err error) {
+	var _args ClearUserTokensByRPCArgs
+	_args.Req = Req
+	var _result ClearUserTokensByRPCResult
+	if err = p.c.Call(ctx, "ClearUserTokensByRPC", &_args, &_result); err != nil {
 		return
 	}
 	return _result.GetSuccess(), nil

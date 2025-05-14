@@ -67,6 +67,8 @@ services:
       context: ./
       dockerfile: ./deploy/Dockerfile-frontend
 #    image: byte_go-frontend:latest
+    container_name: byte_go-frontend
+    image: byte_go-frontend:latest
     ports:
       - "8080:8080"
     environment:

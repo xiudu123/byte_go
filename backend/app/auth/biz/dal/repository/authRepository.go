@@ -34,3 +34,6 @@ func (r *AuthRepository) IsJTIBlackListed(ctx context.Context, jti string) (bool
 func (r *AuthRepository) GetPermissionVersion(ctx context.Context, userId uint32) (int64, error) {
 	return r.authDao.GetPermissionVersion(ctx, userId)
 }
+func (r *AuthRepository) IncrementPermissionVersion(ctx context.Context, userId uint32) error {
+	return r.authDao.IncrementPermissionVersion(ctx, userId)
+}

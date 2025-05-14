@@ -25,6 +25,12 @@ service UserService {
   rpc UpdateUser(UpdateUserReq) returns (UpdateUserResp) {
     option (api.post) = "/user/update/:user_id";
   }
+  rpc AddRole(AddRoleReq) returns (common_hertz.Empty) {
+    option (api.post) = "/user/add_role";
+  }
+  rpc RemoveRole(RemoveRoleReq) returns (common_hertz.Empty) {
+    option (api.post) = "/user/remove_role";
+  }
 }
 
 message User {
@@ -79,4 +85,14 @@ message UpdateUserReq {
 }
 message UpdateUserResp {
   User user = 1;
+}
+
+message AddRoleReq {
+  uint32 user_id = 1[(api.form) = "user_id" ];
+  string role = 2[(api.form) = "role" ];
+}
+
+message RemoveRoleReq {
+  uint32 user_id = 1[(api.form) = "user_id" ];
+  string role = 2[(api.form) = "role" ];
 }

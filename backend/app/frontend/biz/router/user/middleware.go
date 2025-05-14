@@ -60,3 +60,13 @@ func _updateuserMw() []app.HandlerFunc {
 	// your code...
 	return nil
 }
+
+func _addroleMw() []app.HandlerFunc {
+	// your code...
+	return nil
+}
+
+func _removeroleMw() []app.HandlerFunc {
+	// your code...
+	return nil
+}

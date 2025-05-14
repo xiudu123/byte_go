@@ -63,3 +63,19 @@ func (dao *AuthDao) GetPermissionVersion(ctx context.Context, userId uint32) (in
 	}
 	return version, nil
 }
+
+func (dao *AuthDao) IncrementPermissionVersion(ctx context.Context, userId uint32) error {
+	key := fmt.Sprintf("%s%d", PermissionVersionKey, userId)
+
+	if err := dao.client.Incr(ctx, key).Err(); err != nil {
+		klog.Errorf("redis auth dao: increment permission version failed: %v", err.Error())
+		return err
+	}
+
+	if err := dao.client.Expire(ctx, key, randomExpiration()).Err(); err != nil {
+		klog.Errorf("redis auth dao: set permission version expiration failed: %v", err.Error())
+		return err
+	}
+
+	return nil
+}

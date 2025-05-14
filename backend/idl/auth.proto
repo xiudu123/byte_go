@@ -9,6 +9,7 @@ service AuthService {
   rpc DeliverTokenByRPC(DeliverTokenReq) returns (DeliveryResp) {} // 分发令牌
   rpc VerifyTokenByRPC(VerifyTokenReq) returns (VerifyResp) {} // 校验令牌
   rpc DeleteTokenByRPC(DeleteTokenReq) returns (common.Empty) {} // 删除令牌
+  rpc ClearUserTokensByRPC(ClearUserTokensReq) returns (common.Empty) {} // 删除用户的所有令牌
 }
 
 message DeliverTokenReq {
@@ -24,6 +25,10 @@ message DeleteTokenReq {
   string jti = 1;
 }
 
+message ClearUserTokensReq {
+  uint32 user_id = 1;
+}
+
 message DeliveryResp {
   string token = 1;
 }
@@ -32,3 +37,4 @@ message VerifyResp {
   uint32 user_id = 1;
   string jti = 2;
 }
+

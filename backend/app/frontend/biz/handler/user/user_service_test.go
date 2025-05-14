@@ -98,3 +98,32 @@ func TestUpdateUser(t *testing.T) {
 	// assert.DeepEqual(t, 200, resp.StatusCode())
 	// assert.DeepEqual(t, "null", string(resp.Body()))
 }
+
+func TestAddRole(t *testing.T) {
+	h := server.Default()
+	h.POST("/user/add_role", AddRole)
+	path := "/user/add_role"                                  // todo: you can customize query
+	body := &ut.Body{Body: bytes.NewBufferString(""), Len: 1} // todo: you can customize body
+	header := ut.Header{}                                     // todo: you can customize header
+	w := ut.PerformRequest(h.Engine, "POST", path, body, header)
+	resp := w.Result()
+	t.Log(string(resp.Body()))
+
+	// todo edit your unit test.
+	// assert.DeepEqual(t, 200, resp.StatusCode())
+	// assert.DeepEqual(t, "null", string(resp.Body()))
+}
+func TestRemoveRole(t *testing.T) {
+	h := server.Default()
+	h.POST("/user/remove_role", RemoveRole)
+	path := "/user/remove_role"                               // todo: you can customize query
+	body := &ut.Body{Body: bytes.NewBufferString(""), Len: 1} // todo: you can customize body
+	header := ut.Header{}                                     // todo: you can customize header
+	w := ut.PerformRequest(h.Engine, "POST", path, body, header)
+	resp := w.Result()
+	t.Log(string(resp.Body()))
+
+	// todo edit your unit test.
+	// assert.DeepEqual(t, 200, resp.StatusCode())
+	// assert.DeepEqual(t, "null", string(resp.Body()))
+}

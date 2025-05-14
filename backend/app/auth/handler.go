@@ -30,3 +30,10 @@ func (s *AuthServiceImpl) DeleteTokenByRPC(ctx context.Context, req *auth.Delete
 
 	return resp, err
 }
+
+// ClearUserTokensByRPC implements the AuthServiceImpl interface.
+func (s *AuthServiceImpl) ClearUserTokensByRPC(ctx context.Context, req *auth.ClearUserTokensReq) (resp *common.Empty, err error) {
+	resp, err = service.NewClearUserTokensByRPCService(ctx).Run(req)
+
+	return resp, err
+}

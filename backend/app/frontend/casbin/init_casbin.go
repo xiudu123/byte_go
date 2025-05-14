@@ -3,9 +3,11 @@ package casbin
 import (
 	"byte_go/backend/app/frontend/biz/dal/mysql"
 	"byte_go/backend/app/frontend/conf"
+	"errors"
 	"github.com/casbin/casbin/v2"
 	"github.com/casbin/casbin/v2/model"
 	gormadapter "github.com/casbin/gorm-adapter/v3"
+	"github.com/cloudwego/hertz/pkg/common/hlog"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -57,22 +59,17 @@ func initPagePermission() {
 	_ = AddPolicyRole(UserRole, "payment/charge", "POST")
 	_ = AddPolicyRole(UserRole, "checkout", "POST")
 	_ = AddPolicyRole(AdminRole, "user/delete/*", "POST")
+	_ = AddPolicyRole(AdminRole, "user/add_role", "POST")
+	_ = AddPolicyRole(AdminRole, "user/remove_role", "POST")
 	_ = AddPolicyRole(MerchantRole, "products/create", "POST")
 	_ = AddPolicyRole(MerchantRole, "products/delete/*", "GET")
 	_ = AddPolicyRole(MerchantRole, "products/update/*", "POST")
 	if conf.GetEnv() == "test" {
-		_ = AddRoleForUser(1, UserRole)
-		_ = AddRoleForUser(1, MerchantRole)
 		_ = AddRoleForUser(1, AdminRole)
 		_ = AddRoleForUser(2, UserRole)
 		_ = AddRoleForUser(2, MerchantRole)
 		_ = AddRoleForUser(3, UserRole)
 	}
-}
-
-func AddPolicyRole(role string, path string, method string) (err error) {
-	_, err = enforcer.AddPolicy(role, path, method)
-	return err
 }
 
 func KeyMatch(key1 string, key2 string) bool {
@@ -92,66 +89,124 @@ func KeyMatchFunc(args ...interface{}) (interface{}, error) {
 	return (bool)(KeyMatch(name1, name2)), nil
 }
 
+func checkRole(role string) error {
+	if role == UserRole || role == AdminRole || role == MerchantRole {
+		return nil
+	}
+	return errors.New("role is not valid")
+}
+
+func AddPolicyRole(role string, path string, method string) (err error) {
+	if err = checkRole(role); err != nil {
+		hlog.Errorf("role %s is not valid, err=%v", role, err)
+		return err
+	}
+	_, err = enforcer.AddPolicy(role, path, method)
+	if err != nil {
+		hlog.Errorf("add policy %s %s %s failed, err=%v", role, path, method, err)
+		return err
+	}
+	return nil
+}
+
 func AddRoleForUser(uid uint32, role string) (err error) {
+	if err = checkRole(role); err != nil {
+		hlog.Errorf("role %s is not valid, err=%v", role, err)
+		return err
+	}
 	uId := strconv.Itoa(int(uid))
 	_, err = enforcer.AddRoleForUser(uId, role)
 	if err != nil {
+		hlog.Errorf("add role %s for user %s failed, err=%v", role, uId, err)
 		return err
 	}
 	err = enforcer.SavePolicy()
-	return err
+	if err != nil {
+		hlog.Errorf("save policy failed, err=%v", err)
+		return err
+	}
+	return nil
 }
 
 func DeleteRoleForUser(uid uint32, role string) (err error) {
+	if err = checkRole(role); err != nil {
+		hlog.Errorf("role %s is not valid, err=%v", role, err)
+		return err
+	}
 	uId := strconv.Itoa(int(uid))
 	_, err = enforcer.DeleteRoleForUser(uId, role)
 	if err != nil {
+		hlog.Errorf("delete role %s for user %s failed, err=%v", role, uId, err)
 		return err
 	}
 	err = enforcer.SavePolicy()
-	return err
+	if err != nil {
+		hlog.Errorf("save policy failed, err=%v", err)
+		return err
+	}
+	return nil
 }
 
 func DeleteRolesForUser(uid uint32) (err error) {
 	uId := strconv.Itoa(int(uid))
 	_, err = enforcer.DeleteRolesForUser(uId)
 	if err != nil {
+		hlog.Errorf("delete roles for user %s failed, err=%v", uId, err)
 		return err
 	}
 	err = enforcer.SavePolicy()
-	return err
+	if err != nil {
+		hlog.Errorf("save policy failed, err=%v", err)
+		return err
+	}
+	return nil
 }
 
 func GetRolesForUser(uid uint32) ([]string, error) {
 	uId := strconv.Itoa(int(uid))
 	roles, err := enforcer.GetRolesForUser(uId)
-	return roles, err
+	if err != nil {
+		hlog.Errorf("get roles for user %s failed, err=%v", uId, err)
+		return nil, err
+	}
+	return roles, nil
 }
 
 func DeleteUser(uid uint32) (err error) {
 	uId := strconv.Itoa(int(uid))
 	_, err = enforcer.DeleteUser(uId)
 	if err != nil {
+		hlog.Errorf("delete user %s failed, err=%v", uId, err)
 		return err
 	}
 	err = enforcer.SavePolicy()
-	return err
+	if err != nil {
+		hlog.Errorf("save policy failed, err=%v", err)
+		return err
+	}
+	return nil
 }
 
 func HasRoleForUser(uid uint32, role string) (bool, error) {
 	uId := strconv.Itoa(int(uid))
 	has, err := enforcer.HasRoleForUser(uId, role)
-	return has, err
+	if err != nil {
+		hlog.Errorf("has role %s for user %s failed, err=%v", role, uId, err)
+		return false, err
+	}
+	return has, nil
 }
 
 func CheckPermission(uid uint32, path string, method string) (bool, error) {
 	uIds, err := GetRolesForUser(uid)
 	if err != nil {
+		hlog.Errorf("get roles for user %d failed, err=%v", uid, err)
 		return false, err
 	}
 	for _, uId := range uIds {
 		ok, err := enforcer.Enforce(uId, path, method)
 		if err != nil {
+			hlog.Errorf("enforce failed, err=%v", err)
 			return false, err
 		}
 		if ok {

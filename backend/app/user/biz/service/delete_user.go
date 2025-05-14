@@ -2,6 +2,8 @@ package service
 
 import (
 	"byte_go/backend/app/user/biz/dal/repository"
+	"byte_go/backend/app/user/infra/rpc"
+	rpcAuth "byte_go/backend/rpc_gen/kitex_gen/auth"
 	common "byte_go/backend/rpc_gen/kitex_gen/common"
 	user "byte_go/backend/rpc_gen/kitex_gen/user"
 	"byte_go/kitex_err"
@@ -32,12 +34,11 @@ func (s *DeleteUserService) Run(req *user.DeleteUserReq) (resp *common.Empty, er
 	}
 
 	// 删除用户的token
-	// TODO 修改用户权限版本号
-	//_, err = rpc.AuthClient.DeleteTokenListByRPC(s.ctx, &rpcAuth.DeleteTokenListReq{UserId: userId})
-	//if err != nil {
-	//	klog.Errorf("user delete token list failed, user_id:%+v,  err: %v", userId, err.Error())
-	//	return nil, err
-	//}
+	_, err = rpc.AuthClient.ClearUserTokensByRPC(s.ctx, &rpcAuth.ClearUserTokensReq{UserId: userId})
+	if err != nil {
+		klog.Errorf("user delete token list failed, user_id:%+v,  err: %v", userId, err.Error())
+		return nil, err
+	}
 
 	return &common.Empty{}, nil
 }

@@ -34,3 +34,12 @@ func DeleteTokenByRPC(ctx context.Context, req *auth.DeleteTokenReq, callOptions
 	}
 	return resp, nil
 }
+
+func ClearUserTokensByRPC(ctx context.Context, req *auth.ClearUserTokensReq, callOptions ...callopt.Option) (resp *common.Empty, err error) {
+	resp, err = defaultClient.ClearUserTokensByRPC(ctx, req, callOptions...)
+	if err != nil {
+		klog.CtxErrorf(ctx, "ClearUserTokensByRPC call failed,err =%+v", err)
+		return nil, err
+	}
+	return resp, nil
+}
